@@ -70,7 +70,7 @@ const ExamArena: React.FC<ExamArenaProps> = ({ initialTopic, onClearTopic }) => 
           { role: 'system', content: 'You are a quiz master. Create challenging educational quizzes. Output ONLY valid JSON.' },
           { role: 'user', content: prompt }
         ]);
-        
+
         // Robust JSON parsing
         const jsonMatch = response.match(/\[.*\]/s);
         const jsonStr = jsonMatch ? jsonMatch[0] : response;
@@ -143,23 +143,23 @@ const ExamArena: React.FC<ExamArenaProps> = ({ initialTopic, onClearTopic }) => 
 
       {quiz.length > 0 && (
         <div className="sticky top-0 z-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md p-4 rounded-2xl border dark:border-slate-800 shadow-sm flex flex-col gap-2">
-           <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-bold text-slate-700 dark:text-slate-300">Time Remaining:</span>
-                <span className={`text-lg font-mono font-bold ${timeLeft < 60 ? 'text-red-500 animate-pulse' : 'text-indigo-600'}`}>
-                  {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
-                </span>
-              </div>
-              <div className="text-xs font-bold text-slate-500">
-                {quiz.filter((q, i) => answers[q.id] !== undefined).length} / {quiz.length} Answered
-              </div>
-           </div>
-           <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-              <div 
-                className={`h-full transition-all duration-1000 ${timeLeft < 60 ? 'bg-red-500' : 'bg-indigo-600'}`}
-                style={{ width: `${(timeLeft / totalTime) * 100}%` }}
-              ></div>
-           </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold text-slate-700 dark:text-slate-300">Time Remaining:</span>
+              <span className={`text-lg font-mono font-bold ${timeLeft < 60 ? 'text-red-500 animate-pulse' : 'text-indigo-600'}`}>
+                {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+              </span>
+            </div>
+            <div className="text-xs font-bold text-slate-500">
+              {quiz.filter((q, i) => answers[q.id] !== undefined).length} / {quiz.length} Answered
+            </div>
+          </div>
+          <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+            <div
+              className={`h-full transition-all duration-1000 ${timeLeft < 60 ? 'bg-red-500' : 'bg-indigo-600'}`}
+              style={{ width: `${(timeLeft / totalTime) * 100}%` }}
+            ></div>
+          </div>
         </div>
       )}
 
