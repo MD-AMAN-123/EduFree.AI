@@ -269,3 +269,18 @@ export const checkOriginality = async (text: string) => {
   // basic placeholder logic
   return text.length > 20;
 };
+export async function generateVisualAid(topic: string): Promise<string> {
+  if (!topic) return "No topic provided";
+
+  try {
+    if (!genAI) return "API Key missing";
+
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const res = await model.generateContent(`Explain ${topic} clearly with examples`);
+
+    return res.response.text();
+  } catch (err) {
+    console.error(err);
+    return "Failed to generate visual aid";
+  }
+}
