@@ -13,10 +13,10 @@ import DoubtSolver from './components/DoubtSolver';
 import SmartAnalytics from './components/SmartAnalytics';
 import { AppView, User, DashboardStats, Student } from './types';
 import { LifeBuoy, Layout, MessageCircle, PenTool, Camera, Menu } from 'lucide-react';
-import { fetchStudents } from './services/studentService';
+import { fetchStudents, subscribeToStudents } from './services/studentService';
 import { generateDashboardInsights } from './services/geminiService';
 import { logUserLogin } from './services/authService';
-import { fetchUserStats, saveUserStats } from './services/statsService';
+import { fetchUserStats, saveUserStats, subscribeToUserStats } from './services/statsService';
 
 const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -52,6 +52,14 @@ const App: React.FC = () => {
       setIsDataLoaded(true);
     };
     loadStudents();
+
+    // Set up real-time subscription for students
+    if (user) {
+        const subscription = subscribeToStudents(user.id, loadStudents);
+        return () => {
+            subscription.unsubscribe();
+        };
+    }
   }, [user]);
 
   // Sync state changes to LocalStorage
@@ -180,6 +188,19 @@ const App: React.FC = () => {
       console.error("Failed to generate insights:", error);
     }
   };
+
+  // Effect: Real-time Stats Subscription
+  useEffect(() => {
+    if (!user) return;
+
+    const subscription = subscribeToUserStats(user.id, (newStats) => {
+        setStats(newStats);
+    });
+
+    return () => {
+        subscription.unsubscribe();
+    };
+  }, [user]);
 
   const handleLogout = () => {
     setUser(null);

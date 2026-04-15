@@ -36,3 +36,26 @@ export const saveUserStats = async (userId: string, stats: DashboardStats) => {
     console.error('Failed to save user stats:', err);
   }
 };
+
+/**
+ * REAL-TIME STATS SUBSCRIPTION
+ */
+export const subscribeToUserStats = (userId: string, onUpdate: (stats: DashboardStats) => void) => {
+  return supabase
+    .channel(`stats-${userId}`)
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'user_stats',
+        filter: `user_id=eq.${userId}`
+      },
+      (payload: any) => {
+        if (payload.new && payload.new.stats) {
+            onUpdate(payload.new.stats);
+        }
+      }
+    )
+    .subscribe();
+};

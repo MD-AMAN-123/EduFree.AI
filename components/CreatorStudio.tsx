@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Bot, Sparkles, Save, User, ArrowLeft, Send, Trash2, MessageCircle } from 'lucide-react';
 import { StudyBot, ChatMessage, CoachMode, Language } from '../types';
-import { generateCoachResponse } from '../services/geminiService';
+import { generateCoachResponse, generateCoachResponseStream } from '../services/geminiService';
 
 const CreatorStudio: React.FC = () => {
   // --- Bot Management State ---
@@ -68,7 +68,11 @@ const CreatorStudio: React.FC = () => {
     setInputText('');
 
     try {
-      const response = await generateCoachResponse(
+      // Create AI placeholder
+      const aiMsgId = (Date.now() + 1).toString();
+      setMessages(prev => [...prev, { id: aiMsgId, role: 'model', text: '', timestamp: Date.now() }]);
+
+      const stream = generateCoachResponseStream(
         messages.map(m => ({ role: m.role, text: m.text })),
         userMsg.text,
         CoachMode.LEARNING,
@@ -77,14 +81,13 @@ const CreatorStudio: React.FC = () => {
         activeBot
       );
 
-      const aiMsg: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'model',
-        text: response.text,
-        timestamp: Date.now()
-      };
-      
-      setMessages(prev => [...prev, aiMsg]);
+      let fullText = "";
+      for await (const chunk of stream) {
+        fullText += chunk;
+        setMessages(prev => prev.map(m => 
+          m.id === aiMsgId ? { ...m, text: fullText } : m
+        ));
+      }
     } catch (error) {
       console.error(error);
     } finally {

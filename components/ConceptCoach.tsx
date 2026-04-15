@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Mic, Play, Square, Loader2, Volume2, Globe, Image as ImageIcon } from 'lucide-react';
 import { CoachMode, ChatMessage, Language } from '../types';
-import { generateCoachResponse, blobToBase64, generateVisualAid } from '../services/geminiService';
+import { generateCoachResponse, generateCoachResponseStream, blobToBase64, generateVisualAid } from '../services/geminiService';
 
 interface ConceptCoachProps {
   initialTopic?: string;
@@ -65,14 +65,34 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
 
       // Smart Hybrid Toggle
       if (navigator.onLine) {
-        const response = await generateCoachResponse(
+        // Create a placeholder message for the AI response
+        const aiMsgId = (Date.now() + 1).toString();
+        const placeholderMsg: ChatMessage = {
+          id: aiMsgId,
+          role: 'model',
+          text: '',
+          timestamp: Date.now()
+        };
+        
+        setMessages(prev => [...prev, placeholderMsg]);
+
+        const stream = generateCoachResponseStream(
           messages.map(m => ({ role: m.role, text: m.text })),
           text || "Process this audio",
           mode,
           language,
           audioBase64
         );
-        responseText = response.text;
+
+        let fullText = "";
+        for await (const chunk of stream) {
+          fullText += chunk;
+          // Update the specific message in the list
+          setMessages(prev => prev.map(m => 
+            m.id === aiMsgId ? { ...m, text: fullText } : m
+          ));
+        }
+        responseText = fullText;
       } else {
         const { offlineAIService } = await import('../services/offlineAiService');
         
@@ -98,6 +118,16 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
                 ...messages.map(m => ({ role: m.role === 'model' ? 'assistant' : 'user', content: m.text })),
                 { role: 'user', content: text }
              ] as any);
+
+             const aiMsg: ChatMessage = {
+               id: (Date.now() + 1).toString(),
+               role: 'model',
+               text: responseText,
+               isAudio: true,
+               timestamp: Date.now()
+             };
+       
+             setMessages(prev => [...prev, aiMsg]);
           } else {
              throw new Error("WEBGPU_NOT_SUPPORTED");
           }
@@ -105,28 +135,30 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
           console.warn("Offline failed, falling back to cloud:", offlineErr.message);
           setIsModelLoading(false);
           
-          // CRITICAL FALLBACK: Use Online if possible even if "Offline" tab is active
-          const response = await generateCoachResponse(
+          // CRITICAL FALLBACK: Use Online Stream
+          const aiMsgId = (Date.now() + 1).toString();
+          setMessages(prev => [...prev, { id: aiMsgId, role: 'model', text: '', timestamp: Date.now() }]);
+
+          const stream = generateCoachResponseStream(
             messages.map(m => ({ role: m.role, text: m.text })),
             text || "Process this audio",
             mode,
             language,
             audioBase64
           );
-          responseText = response.text;
+
+          let fullText = "";
+          for await (const chunk of stream) {
+            fullText += chunk;
+            setMessages(prev => prev.map(m => 
+              m.id === aiMsgId ? { ...m, text: fullText } : m
+            ));
+          }
+          responseText = fullText;
         }
       }
 
-      const aiMsg: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'model',
-        text: responseText,
-        isAudio: true,
-        timestamp: Date.now()
-      };
-
-      setMessages(prev => [...prev, aiMsg]);
-      speakText(responseText);
+      if (responseText) speakText(responseText);
 
     } catch (error: any) {
       console.error(error);

@@ -84,3 +84,22 @@ export const removeStudent = async (id: string): Promise<boolean> => {
     return false;
   }
 };
+
+/**
+ * REAL-TIME SUBSCRIPTION
+ */
+export const subscribeToStudents = (userId: string, onUpdate: () => void) => {
+  return supabase
+    .channel('students-realtime')
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'students',
+        filter: `user_id=eq.${userId}`
+      },
+      () => onUpdate()
+    )
+    .subscribe();
+};

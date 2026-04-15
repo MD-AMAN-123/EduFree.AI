@@ -141,32 +141,72 @@ export async function generateCoachResponse(
   }
 
   try {
-    // TRIPLE FALLBACK: try Flash -> try Pro -> try Offline
-    try {
-      const model = genAI.getGenerativeModel({
-        model: "gemini-1.5-flash",
-        systemInstruction: COACH_SYSTEM_INSTRUCTION(mode, language, bot)
-      });
-      const result = await model.startChat({ history: chatHistory }).sendMessage(parts);
-      return { text: (await result.response).text() };
-    } catch (e1) {
-      console.warn("Flash failed, trying Gemini Pro...");
-      try {
-        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-        const result = await model.startChat({ history: chatHistory }).sendMessage(currentMessage);
-        return { text: (await result.response).text() };
-      } catch (e2) {
-        console.error("All Cloud Engines failed, falling back to OFFLINE AI...");
-        const offlineResponse = await offlineAIService.generateResponse([
-          { role: 'system', content: `Expert Tutor. Language: ${language}` },
-          ...history.map(m => ({ role: m.role === 'model' ? 'assistant' : 'user', content: m.text })),
-          { role: 'user', content: currentMessage }
-        ] as any);
-        return { text: offlineResponse };
-      }
-    }
+    const model = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash",
+      systemInstruction: COACH_SYSTEM_INSTRUCTION(mode, language, bot)
+    });
+    const result = await model.startChat({ history: chatHistory }).sendMessage(parts);
+    return { text: (await result.response).text() };
   } catch (outerError: any) {
+    console.error("Coach Error:", outerError);
     return { text: "EduFree is still warming up its brain. Please try again in 5 seconds!" };
+  }
+}
+
+/**
+ * GENERATE COACH RESPONSE (STREAMING)
+ * Real-time text generation for a more premium experience.
+ */
+export async function* generateCoachResponseStream(
+  history: ChatMessage[],
+  currentMessage: string,
+  mode: CoachMode,
+  language: Language,
+  audioBase64?: string,
+  bot?: StudyBot
+): AsyncGenerator<string> {
+
+  if (!genAI) {
+    yield "AI Service is currently unavailable.";
+    return;
+  }
+
+  const filteredHistory = history.filter((msg, idx) => {
+    if (idx === 0 && msg.role === 'model') return false;
+    return true;
+  });
+
+  const chatHistory = filteredHistory.map(msg => ({
+    role: msg.role === 'model' ? 'model' : 'user',
+    parts: [{ text: msg.text }]
+  }));
+
+  const parts: (string | Part)[] = [currentMessage];
+  if (audioBase64) {
+    parts.push({
+      inlineData: {
+        data: audioBase64,
+        mimeType: "audio/wav"
+      }
+    });
+  }
+
+  try {
+    const model = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash",
+      systemInstruction: COACH_SYSTEM_INSTRUCTION(mode, language, bot)
+    });
+
+    const chat = model.startChat({ history: chatHistory });
+    const result = await chat.sendMessageStream(parts);
+
+    for await (const chunk of result.stream) {
+      const chunkText = chunk.text();
+      yield chunkText;
+    }
+  } catch (err: any) {
+    console.error("Streaming Error:", err);
+    yield "I encountered an error while thinking. Please try again.";
   }
 }
 
@@ -370,6 +410,51 @@ export async function generateSupportResponse(
   } catch (error) {
     console.error("Support Error:", error);
     return "I'm having trouble helping right now. Please try again later.";
+  }
+}
+
+/**
+ * GENERATE SUPPORT RESPONSE (STREAMING)
+ */
+export async function* generateSupportResponseStream(
+  history: any[],
+  currentMessage: string,
+  students?: any[],
+  actions?: { [key: string]: (data: any) => Promise<string> }
+): AsyncGenerator<string> {
+
+  if (!genAI) {
+    yield "Support service offline.";
+    return;
+  }
+
+  try {
+    const model = genAI.getGenerativeModel({
+      model: "gemini-1.5-flash",
+      systemInstruction: "You are the EduFree Support Assistant. Help users with technical issues, account queries, and classroom management if they are teachers."
+    });
+
+    const chatHistory = history.map(msg => ({
+      role: msg.role === 'model' ? 'model' : 'user',
+      parts: [{ text: msg.text }]
+    }));
+
+    const prompt = `
+      User Message: ${currentMessage}
+      ${students ? `Context (Student List): ${JSON.stringify(students)}` : ""}
+      
+      Reply normally to the user.
+    `;
+
+    const chat = model.startChat({ history: chatHistory });
+    const result = await chat.sendMessageStream(prompt);
+
+    for await (const chunk of result.stream) {
+      yield chunk.text();
+    }
+  } catch (error) {
+    console.error("Support Stream Error:", error);
+    yield "System error encountered.";
   }
 }
 
