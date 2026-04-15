@@ -127,9 +127,14 @@ export async function generateCoachResponse(
       systemInstruction: COACH_SYSTEM_INSTRUCTION(mode, language, bot)
     });
 
-    // Convert history for Gemini (excluding current message)
-    // Map 'model' to 'model' and 'user' to 'user' service-side
-    const chatHistory = history.map(msg => ({
+    // GEMINI REQUIREMENT: History must start with 'user' role
+    // We skip any initial greeting from the 'model'
+    const filteredHistory = history.filter((msg, idx) => {
+      if (idx === 0 && msg.role === 'model') return false;
+      return true;
+    });
+
+    const chatHistory = filteredHistory.map(msg => ({
       role: msg.role === 'model' ? 'model' : 'user',
       parts: [{ text: msg.text }]
     }));
@@ -156,7 +161,7 @@ export async function generateCoachResponse(
 
   } catch (error: any) {
     console.error("Coach Generation Error:", error);
-    
+
     // Check for specific error types to give user-friendly advice
     let errorMessage = error.message || "Unknown connection error";
     if (errorMessage.includes("API_KEY_INVALID")) {
@@ -188,13 +193,19 @@ export async function generateQuiz(
     const text = res.response.text();
 
     const questions = safeParse<QuizQuestion[]>(text, []);
+
+    // If generation failed or empty, return default mock questions for offline/fallback
+    if (questions.length === 0) {
+      return [
+        { id: 1, question: `Explain a core concept in ${topic}`, options: ["Option A", "Option B", "Option C", "Option D"], correctAnswerIndex: 0, explanation: "Self-assessment mode: think through the logic." }
+      ];
+    }
+
     return questions.map((q, i) => ({ ...q, id: q.id || i }));
 
   } catch (error: any) {
     console.error("Quiz Generation Error:", error);
-    // Return a mock question if it fails so the UI doesn't just show "failed" if possible, 
-    // but better to let the component handle the empty array.
-    return [];
+    return [{ id: 1, question: `Could not reach AI for ${topic}. Try again or check connection.`, options: ["N/A"], correctAnswerIndex: 0, explanation: "Connection error fallback." }];
   }
 }
 
@@ -288,16 +299,16 @@ export async function solveQuestionFromImage(
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const prompt = `
-      Analyze this image of an educational question. 
-      1. Identify the topic.
-      2. Provide the final short answer.
-      3. List clear, step-by-step instructions to reach the solution.
+      You are a vision reasoning engine. Analyze this image carefully.
+      - If it is a math problem (like 8+8), solve it step by step.
+      - If it is a diagram, explain it.
+      - If it is handwritten, transcribe and solve.
 
-      Return ONLY a JSON object:
+      Output ONLY JSON:
       {
-        "topic": "string",
-        "answer": "string",
-        "steps": ["string", "string", ...]
+        "topic": "string (Subject/Category)",
+        "answer": "string (Short final result)",
+        "steps": ["Step 1...", "Step 2...", ...]
       }
     `;
 
