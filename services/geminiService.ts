@@ -16,12 +16,10 @@ import {
 ================================ */
 
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-
-if (!apiKey) {
-  console.warn("VITE_GEMINI_API_KEY is not defined in environment variables. AI features will be disabled.");
-}
-
 const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
+
+// Import offline service for transparent fallback
+import { offlineAIService } from "./offlineAiService";
 
 /* ===============================
    PROMPTS & SYSTEM INSTRUCTIONS
@@ -121,58 +119,54 @@ export async function generateCoachResponse(
 
   if (!genAI) return { text: "AI Service is currently unavailable. Please check your API configuration." };
 
+  // GEMINI REQUIREMENT: History must start with 'user' role
+  const filteredHistory = history.filter((msg, idx) => {
+    if (idx === 0 && msg.role === 'model') return false;
+    return true;
+  });
+
+  const chatHistory = filteredHistory.map(msg => ({
+    role: msg.role === 'model' ? 'model' : 'user',
+    parts: [{ text: msg.text }]
+  }));
+
+  const parts: (string | Part)[] = [currentMessage];
+  if (audioBase64) {
+    parts.push({
+      inlineData: {
+        data: audioBase64,
+        mimeType: "audio/wav"
+      }
+    });
+  }
+
   try {
-    const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
-      systemInstruction: COACH_SYSTEM_INSTRUCTION(mode, language, bot)
-    });
-
-    // GEMINI REQUIREMENT: History must start with 'user' role
-    // We skip any initial greeting from the 'model'
-    const filteredHistory = history.filter((msg, idx) => {
-      if (idx === 0 && msg.role === 'model') return false;
-      return true;
-    });
-
-    const chatHistory = filteredHistory.map(msg => ({
-      role: msg.role === 'model' ? 'model' : 'user',
-      parts: [{ text: msg.text }]
-    }));
-
-    const chat = model.startChat({
-      history: chatHistory,
-    });
-
-    const parts: (string | Part)[] = [currentMessage];
-
-    // Handle multimodal image/audio in future if needed (here we just handle text/audioBase64 as parts)
-    if (audioBase64) {
-      parts.push({
-        inlineData: {
-          data: audioBase64,
-          mimeType: "audio/wav"
-        }
+    // TRIPLE FALLBACK: try Flash -> try Pro -> try Offline
+    try {
+      const model = genAI.getGenerativeModel({
+        model: "gemini-1.5-flash",
+        systemInstruction: COACH_SYSTEM_INSTRUCTION(mode, language, bot)
       });
+      const result = await model.startChat({ history: chatHistory }).sendMessage(parts);
+      return { text: (await result.response).text() };
+    } catch (e1) {
+      console.warn("Flash failed, trying Gemini Pro...");
+      try {
+        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+        const result = await model.startChat({ history: chatHistory }).sendMessage(currentMessage);
+        return { text: (await result.response).text() };
+      } catch (e2) {
+        console.error("All Cloud Engines failed, falling back to OFFLINE AI...");
+        const offlineResponse = await offlineAIService.generateResponse([
+          { role: 'system', content: `Expert Tutor. Language: ${language}` },
+          ...history.map(m => ({ role: m.role === 'model' ? 'assistant' : 'user', content: m.text })),
+          { role: 'user', content: currentMessage }
+        ] as any);
+        return { text: offlineResponse };
+      }
     }
-
-    const result = await chat.sendMessage(parts);
-    const response = await result.response;
-    return { text: response.text() };
-
-  } catch (error: any) {
-    console.error("Coach Generation Error:", error);
-
-    // Check for specific error types to give user-friendly advice
-    let errorMessage = error.message || "Unknown connection error";
-    if (errorMessage.includes("API_KEY_INVALID")) {
-      errorMessage = "Invalid Gemini API Key. Please check your .env.local file.";
-    } else if (errorMessage.includes("User location is not supported")) {
-      errorMessage = "Gemini API is not available in your current region.";
-    } else if (errorMessage.includes("safety")) {
-      errorMessage = "Request blocked by AI safety filters. Please try rephrasing.";
-    }
-
-    return { text: `⚠️ AI Error: ${errorMessage}. Please try again in a moment!` };
+  } catch (outerError: any) {
+    return { text: "EduFree is still warming up its brain. Please try again in 5 seconds!" };
   }
 }
 
@@ -217,19 +211,24 @@ export async function generateLearningPath(
   subject: string
 ): Promise<LearningNode[]> {
 
-  if (!genAI) return [];
+  if (!genAI || !navigator.onLine) return generateOfflineLearningPath(subject);
 
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const res = await model.generateContent(LEARNING_PATH_PROMPT(subject));
-    const text = res.response.text();
-
-    return safeParse<LearningNode[]>(text, []);
-
+    const path = safeParse<LearningNode[]>(res.response.text(), []);
+    return path.length > 0 ? path : generateOfflineLearningPath(subject);
   } catch (error) {
-    console.error("Path Generation Error:", error);
-    return [];
+    return generateOfflineLearningPath(subject);
   }
+}
+
+function generateOfflineLearningPath(subject: string): LearningNode[] {
+  return [
+    { id: '1', title: `Foundations of ${subject}`, description: `Introduction to key concepts and core terminology in ${subject}.`, status: 'UNLOCKED', difficulty: 'Beginner', rationale: 'Essential baseline knowledge.' },
+    { id: '2', title: `Core Principles`, description: `Diving deeper into the mechanics and applications of ${subject}.`, status: 'LOCKED', difficulty: 'Intermediate', rationale: 'Building on the basics.' },
+    { id: '3', title: `Advanced Mastery`, description: `Complex problem solving and advanced theory in ${subject}.`, status: 'LOCKED', difficulty: 'Advanced', rationale: 'Achieving expert-level understanding.' }
+  ];
 }
 
 /* ===============================
