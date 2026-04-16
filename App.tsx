@@ -122,22 +122,22 @@ const App: React.FC = () => {
           const todayIndex = 4; // Mocking today as Fri index 4
           const newActivity = [...prev.weeklyActivity];
           
-          // Increment locally every 10 seconds (10/3600 hours)
-          const increment = 10 / 3600;
+          // Increment locally every 2 seconds (2/3600 hours)
+          const increment = 2 / 3600;
           
           newActivity[todayIndex] = {
             ...newActivity[todayIndex],
-            hours: parseFloat((newActivity[todayIndex].hours + increment).toFixed(4))
+            hours: parseFloat((newActivity[todayIndex].hours + increment).toFixed(5))
           };
 
           const updated = {
             ...prev,
-            studyHours: parseFloat((prev.studyHours + increment).toFixed(4)),
-            xp: prev.xp + 2, // 2 XP every 10 seconds
+            studyHours: parseFloat((prev.studyHours + increment).toFixed(5)),
+            xp: prev.xp + 0.5, // 0.5 XP every 2 seconds (~15 XP per minute)
             weeklyActivity: newActivity
           };
 
-          // Sync to DB every 1 minute (roughly every 6 intervals)
+          // Sync to DB every 1 minute (roughly every 30 intervals)
           if (!syncTimerRef.current) {
               syncTimerRef.current = setTimeout(() => {
                   saveUserStats(user.id, updated);
@@ -147,7 +147,7 @@ const App: React.FC = () => {
 
           return updated;
         });
-      }, 10000); // Update locally every 10 seconds
+      }, 2000); // Update locally every 2 seconds
     }
 
     return () => {

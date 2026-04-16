@@ -22,7 +22,8 @@ const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
 import { offlineAIService } from "./offlineAiService";
 
 const DEFAULT_MODEL = "gemini-1.5-flash-latest";
-const FALLBACK_MODEL = "gemini-1.5-flash"; // Fallback to explicitly named model
+const FALLBACK_MODEL = "gemini-1.5-flash"; 
+const PRO_MODEL = "gemini-1.5-pro"; 
 
 /* ===============================
    PROMPTS & SYSTEM INSTRUCTIONS
@@ -224,8 +225,36 @@ export async function* generateCoachResponseStream(
       yield chunkText;
     }
   } catch (err: any) {
-    console.error("Streaming Error:", err);
-    yield "I encountered an error while thinking. Please try again.";
+    console.warn("Streaming with latest model failed, trying fallback...", err);
+    try {
+        const fallbackModel = genAI.getGenerativeModel({
+          model: FALLBACK_MODEL,
+          systemInstruction: COACH_SYSTEM_INSTRUCTION(mode, language, bot)
+        });
+        const chat = fallbackModel.startChat({ history: chatHistory });
+        const result = await chat.sendMessageStream(parts);
+        for await (const chunk of result.stream) {
+          yield chunk.text();
+        }
+    } catch (fallbackErr: any) {
+        console.warn("Streaming failed entirely, attempting non-streaming fallback...");
+        try {
+            const staticModel = genAI.getGenerativeModel({
+              model: FALLBACK_MODEL,
+              systemInstruction: COACH_SYSTEM_INSTRUCTION(mode, language, bot)
+            });
+            const chat = staticModel.startChat({ history: chatHistory });
+            const result = await chat.sendMessage(parts);
+            yield (await result.response).text();
+        } catch (staticErr: any) {
+            console.error("Critical AI Failure:", staticErr);
+            if (staticErr.message?.includes("API_KEY_INVALID")) {
+                yield "⚠️ AI Configuration Error: Invalid API Key. Please update your environment variables.";
+            } else {
+                yield "I encountered an error while thinking. Please check your internet or try again later.";
+            }
+        }
+    }
   }
 }
 
@@ -242,9 +271,15 @@ export async function generateQuiz(
 
   try {
     const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL });
-    const res = await model.generateContent(QUIZ_PROMPT(topic, difficulty));
+    let res;
+    try {
+        res = await model.generateContent(QUIZ_PROMPT(topic, difficulty));
+    } catch (innerErr) {
+        console.warn("Quiz generation failed with latest model, trying standard flash...");
+        const fbModel = genAI.getGenerativeModel({ model: FALLBACK_MODEL });
+        res = await fbModel.generateContent(QUIZ_PROMPT(topic, difficulty));
+    }
     const text = res.response.text();
-
     const questions = safeParse<QuizQuestion[]>(text, []);
 
     // If generation failed or empty, return default mock questions for offline/fallback
