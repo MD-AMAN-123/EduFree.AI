@@ -8,6 +8,7 @@ const DoubtSolver: React.FC = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [solution, setSolution] = useState<{ topic: string, answer: string, steps: string[] } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [liveLog, setLiveLog] = useState<string[]>([]);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -71,7 +72,21 @@ const DoubtSolver: React.FC = () => {
         try {
           // Extract base64 part for API
           const base64 = dataUrl.split(',')[1];
+          
+          setLiveLog(["Initializing vision model...", "Scanning image for text...", "Extracting mathematical symbols..."]);
+          const logInterval = setInterval(() => {
+            const logs = [
+                "Analyzing concept structure...",
+                "Cross-referencing with knowledge base...",
+                "Validating formula derivation...",
+                "Synthesizing final solution..."
+            ];
+            setLiveLog(prev => [...prev, logs[Math.floor(Math.random() * logs.length)]]);
+          }, 800);
+
           const result = await solveQuestionFromImage(base64);
+          clearInterval(logInterval);
+
           setSolution(result);
           stopCamera();
         } catch (err: any) {
@@ -215,9 +230,16 @@ const DoubtSolver: React.FC = () => {
                        <Sparkles className="text-indigo-600 animate-pulse" size={32} />
                     </div>
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-4 w-full max-w-xs">
                     <p className="text-xl font-black text-slate-900 dark:text-white">Analyzing Question...</p>
-                    <p className="text-slate-500 text-sm">Decoding visual data and computing step-by-step resolution</p>
+                    <div className="space-y-2">
+                        {liveLog.slice(-3).map((log, i) => (
+                            <div key={i} className="flex items-center justify-center gap-2 text-xs font-mono text-indigo-500 animate-pulse">
+                                <span className="w-1.5 h-1.5 bg-indigo-400 rounded-full"></span>
+                                {log}
+                            </div>
+                        ))}
+                    </div>
                   </div>
                 </div>
               ) : error ? (

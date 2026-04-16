@@ -12,6 +12,7 @@ const CreatorStudio: React.FC = () => {
   ]);
 
   const [newBot, setNewBot] = useState({ name: '', subject: '', personality: 'Friendly' });
+  const [isCustomPersonality, setIsCustomPersonality] = useState(false);
 
   // --- Active Chat State ---
   const [activeBot, setActiveBot] = useState<StudyBot | null>(null);
@@ -211,17 +212,44 @@ const CreatorStudio: React.FC = () => {
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Personality</label>
-              <select 
-                className="w-full bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:text-white"
-                value={newBot.personality}
-                onChange={e => setNewBot({...newBot, personality: e.target.value})}
-              >
-                <option>Friendly & Encouraging</option>
-                <option>Strict & Academic</option>
-                <option>Socratic (Question based)</option>
-                <option>Funny & Casual</option>
-                <option>Explain like I am 5</option>
-              </select>
+              {!isCustomPersonality ? (
+                <select 
+                    className="w-full bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:text-white"
+                    value={newBot.personality}
+                    onChange={e => {
+                        if (e.target.value === 'Other / Custom...') {
+                            setIsCustomPersonality(true);
+                            setNewBot({...newBot, personality: ''});
+                        } else {
+                            setNewBot({...newBot, personality: e.target.value});
+                        }
+                    }}
+                >
+                    <option>Friendly & Encouraging</option>
+                    <option>Strict & Academic</option>
+                    <option>Socratic (Question based)</option>
+                    <option>Funny & Casual</option>
+                    <option>Explain like I am 5</option>
+                    <option>Other / Custom...</option>
+                </select>
+              ) : (
+                <div className="relative">
+                    <input 
+                        type="text" 
+                        className="w-full bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white"
+                        placeholder="e.g. 80s Rock Star"
+                        value={newBot.personality}
+                        onChange={e => setNewBot({...newBot, personality: e.target.value})}
+                        autoFocus
+                    />
+                    <button 
+                        onClick={() => setIsCustomPersonality(false)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-indigo-500 hover:underline"
+                    >
+                        Reset
+                    </button>
+                </div>
+              )}
             </div>
             <button 
               onClick={handleCreate}

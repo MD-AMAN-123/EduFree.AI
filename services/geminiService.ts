@@ -21,6 +21,9 @@ const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
 // Import offline service for transparent fallback
 import { offlineAIService } from "./offlineAiService";
 
+const DEFAULT_MODEL = "gemini-1.5-flash-latest";
+const FALLBACK_MODEL = "gemini-1.5-flash"; // Fallback to explicitly named model
+
 /* ===============================
    PROMPTS & SYSTEM INSTRUCTIONS
 ================================ */
@@ -142,7 +145,7 @@ export async function generateCoachResponse(
 
   try {
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
+      model: DEFAULT_MODEL,
       systemInstruction: COACH_SYSTEM_INSTRUCTION(mode, language, bot)
     });
     const result = await model.startChat({ history: chatHistory }).sendMessage(parts);
@@ -193,7 +196,7 @@ export async function* generateCoachResponseStream(
 
   try {
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
+      model: DEFAULT_MODEL,
       systemInstruction: COACH_SYSTEM_INSTRUCTION(mode, language, bot)
     });
 
@@ -222,7 +225,7 @@ export async function generateQuiz(
   if (!genAI) return [];
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL });
     const res = await model.generateContent(QUIZ_PROMPT(topic, difficulty));
     const text = res.response.text();
 
@@ -254,7 +257,7 @@ export async function generateLearningPath(
   if (!genAI || !navigator.onLine) return generateOfflineLearningPath(subject);
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL });
     const res = await model.generateContent(LEARNING_PATH_PROMPT(subject));
     const path = safeParse<LearningNode[]>(res.response.text(), []);
     return path.length > 0 ? path : generateOfflineLearningPath(subject);
@@ -283,7 +286,7 @@ export async function generateDashboardInsights(
   if (!genAI) return [];
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL });
     const res = await model.generateContent(DASHBOARD_INSIGHTS_PROMPT(userName, stats));
     const text = res.response.text();
 
@@ -302,7 +305,7 @@ export async function generateTeacherInsights(
   if (!genAI) return [];
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL });
     const prompt = `
       Analyze this class performance data:
       ${classDataJson}
@@ -336,7 +339,7 @@ export async function solveQuestionFromImage(
   if (!genAI) throw new Error("AI Service Unavailable");
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL });
     const prompt = `
       You are a vision reasoning engine. Analyze this image carefully.
       - If it is a math problem (like 8+8), solve it step by step.
@@ -430,7 +433,7 @@ export async function* generateSupportResponseStream(
 
   try {
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
+      model: DEFAULT_MODEL,
       systemInstruction: "You are the EduFree Support Assistant. Help users with technical issues, account queries, and classroom management if they are teachers."
     });
 
@@ -467,7 +470,7 @@ export async function generateVisualAid(topic: string): Promise<string> {
 
   try {
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
+      model: DEFAULT_MODEL,
       systemInstruction: "You are a visual learning assistant. Create a detailed markdown explanation with ASCII art or Mermaid diagrams where possible to explain topics visually."
     });
     const res = await model.generateContent(`Explain the concept of ${topic} visually using markdown and detailed descriptions.`);
@@ -491,7 +494,7 @@ export const checkOriginality = async (text: string): Promise<{ score: number, a
   }
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL });
     const prompt = `
       Analyze the following text for originality and AI-generated patterns.
       Provide a "score" from 0 to 100 (where 100 is completely original/human) and a brief "analysis" of why.

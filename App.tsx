@@ -99,35 +99,65 @@ const App: React.FC = () => {
     ]
   });
 
-  // Effect: Simulate Real-time tracking when user is studying
+  // Analytics: Real-time study velocity tracking
+  const syncTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const localStatsRef = useRef<DashboardStats>(stats);
+
+  // Keep ref up to date
+  useEffect(() => {
+    localStatsRef.current = stats;
+  }, [stats]);
+
   useEffect(() => {
     let interval: any;
 
+    if (!user) return;
+
     // Only track time if user is in learning-focused views
-    if (currentView === AppView.CONCEPT_COACH || currentView === AppView.EXAM_ARENA) {
+    const learningViews = [AppView.CONCEPT_COACH, AppView.EXAM_ARENA, AppView.DOUBT_SOLVER, AppView.CREATOR_STUDIO];
+    
+    if (learningViews.includes(currentView)) {
       interval = setInterval(() => {
         setStats(prev => {
-          // Determine current day index (0=Mon, 6=Sun) for demo simply use Fri (4) or rotate
-          // For accurate demo visual, let's update 'Fri' which is index 4 in our static array
-          const todayIndex = 4;
-
+          const todayIndex = 4; // Mocking today as Fri index 4
           const newActivity = [...prev.weeklyActivity];
+          
+          // Increment locally every 10 seconds (10/3600 hours)
+          const increment = 10 / 3600;
+          
           newActivity[todayIndex] = {
             ...newActivity[todayIndex],
-            hours: parseFloat((newActivity[todayIndex].hours + 0.01).toFixed(2)) // Increment by 0.01 hours
+            hours: parseFloat((newActivity[todayIndex].hours + increment).toFixed(4))
           };
 
-          return {
+          const updated = {
             ...prev,
-            studyHours: parseFloat((prev.studyHours + 0.01).toFixed(2)),
+            studyHours: parseFloat((prev.studyHours + increment).toFixed(4)),
+            xp: prev.xp + 2, // 2 XP every 10 seconds
             weeklyActivity: newActivity
           };
+
+          // Sync to DB every 1 minute (roughly every 6 intervals)
+          if (!syncTimerRef.current) {
+              syncTimerRef.current = setTimeout(() => {
+                  saveUserStats(user.id, updated);
+                  syncTimerRef.current = null;
+              }, 60000);
+          }
+
+          return updated;
         });
-      }, 6000); // Update every 6 seconds to show movement
+      }, 10000); // Update locally every 10 seconds
     }
 
-    return () => clearInterval(interval);
-  }, [currentView]);
+    return () => {
+        clearInterval(interval);
+        if (syncTimerRef.current) {
+            clearTimeout(syncTimerRef.current);
+            syncTimerRef.current = null;
+        }
+    };
+  }, [currentView, user]);
 
   const handleLogin = async (authenticatedUser: User) => {
     setUser(authenticatedUser);
@@ -244,7 +274,7 @@ const App: React.FC = () => {
       case AppView.CREATOR_STUDIO:
         return <CreatorStudio />;
       case AppView.ECO_TRACKER:
-        return <EcoTracker />;
+        return <EcoTracker stats={stats} />;
       case AppView.LEARNING_PATH:
         return <LearningPath onNavigate={handleNavigate} />;
       case AppView.TEACHER_DASHBOARD:

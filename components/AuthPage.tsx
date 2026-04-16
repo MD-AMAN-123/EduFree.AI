@@ -71,6 +71,16 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
     }
   };
 
+  const handleGuestLogin = () => {
+    const guestUser: User = {
+      id: '00000000-0000-0000-0000-000000000000', // Valid UUID for Guest
+      name: 'Test Student',
+      email: 'test@edufree.ai',
+      avatar: 'https://ui-avatars.com/api/?name=Test+Student&background=6366f1&color=fff'
+    };
+    onLogin(guestUser);
+  };
+
   return (
     <div className="min-h-screen bg-[#0f172a] flex items-center justify-center p-4 relative overflow-hidden font-sans">
       {/* Animated Mesh Gradient Background */}
@@ -214,6 +224,14 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
                     <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
                   </>
                 )}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleGuestLogin}
+                className="w-full mt-4 py-3 rounded-2xl border-2 border-dashed border-white/20 text-indigo-300 font-bold hover:bg-white/5 transition-all text-sm uppercase tracking-widest"
+              >
+                Continue as Guest (Dev)
               </button>
             </form>
 
