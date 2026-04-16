@@ -230,18 +230,12 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
                 )}
               </button>
 
-              <button
-                type="button"
-                onClick={handleGuestLogin}
-                className="w-full mt-4 py-3 rounded-2xl border-2 border-dashed border-white/20 text-indigo-300 font-bold hover:bg-white/5 transition-all text-sm uppercase tracking-widest"
-              >
-                Continue as Guest (Dev)
-              </button>
+
             </form>
 
             <div className="mt-10 flex items-center gap-4">
               <div className="h-px bg-white/10 flex-1"></div>
-              <span className="text-slate-500 text-sm font-medium">Trusted by learners worldwide</span>
+              <span className="text-slate-500 text-sm font-medium">Tru sted by learners worldwide</span>
               <div className="h-px bg-white/10 flex-1"></div>
             </div>
           </div>
