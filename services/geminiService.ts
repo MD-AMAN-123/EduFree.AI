@@ -285,7 +285,7 @@ function generateOfflineLearningPath(subject: string): LearningNode[] {
   ];
 }
 
-export async function generateDailyInsights(userName: string, stats: DashboardStats): Promise<AIInsight[]> {
+export async function generateDashboardInsights(userName: string, stats: DashboardStats): Promise<AIInsight[]> {
   if (!genAI) return [];
   try {
     const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL }, { apiVersion: 'v1' });
