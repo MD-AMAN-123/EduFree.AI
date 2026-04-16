@@ -3,6 +3,11 @@ import { Student } from '../types';
 
 export const fetchStudents = async (userId?: string): Promise<Student[]> => {
   try {
+    if (!supabase) {
+      console.warn('Supabase not initialized. Using local fallback.');
+      return [];
+    }
+
     let query = supabase
       .from('students')
       .select('*')
@@ -28,6 +33,8 @@ export const fetchStudents = async (userId?: string): Promise<Student[]> => {
 
 export const addStudent = async (student: Omit<Student, 'id'>, userId: string): Promise<Student | null> => {
   try {
+    if (!supabase) return null;
+
     const { data, error } = await supabase
       .from('students')
       .insert([{ ...student, user_id: userId }])
@@ -49,6 +56,8 @@ export const updateStudent = async (id: string, updates: Partial<Student>): Prom
   const { id: _, ...safeUpdates } = updates as any;
 
   try {
+    if (!supabase) return null;
+
     const { data, error } = await supabase
       .from('students')
       .update(safeUpdates)
@@ -69,6 +78,8 @@ export const updateStudent = async (id: string, updates: Partial<Student>): Prom
 
 export const removeStudent = async (id: string): Promise<boolean> => {
   try {
+    if (!supabase) return false;
+
     const { error } = await supabase
       .from('students')
       .delete()
@@ -89,6 +100,8 @@ export const removeStudent = async (id: string): Promise<boolean> => {
  * REAL-TIME SUBSCRIPTION
  */
 export const subscribeToStudents = (userId: string, onUpdate: () => void) => {
+  if (!supabase) return { unsubscribe: () => {} };
+
   return supabase
     .channel('students-realtime')
     .on(

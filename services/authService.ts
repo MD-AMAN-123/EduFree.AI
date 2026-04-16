@@ -3,6 +3,8 @@ import { User } from '../types';
 
 export const logUserLogin = async (user: User) => {
   try {
+    if (!supabase) return;
+
     const { error } = await supabase
       .from('user_logins')
       .insert([

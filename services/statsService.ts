@@ -3,6 +3,8 @@ import { DashboardStats } from '../types';
 
 export const fetchUserStats = async (userId: string): Promise<DashboardStats | null> => {
   try {
+    if (!supabase) return null;
+
     const { data, error } = await supabase
       .from('user_stats')
       .select('stats')
@@ -25,6 +27,8 @@ export const fetchUserStats = async (userId: string): Promise<DashboardStats | n
 
 export const saveUserStats = async (userId: string, stats: DashboardStats) => {
   try {
+    if (!supabase) return;
+
     const { error } = await supabase
       .from('user_stats')
       .upsert({ user_id: userId, stats, updated_at: new Date().toISOString() });
@@ -41,6 +45,8 @@ export const saveUserStats = async (userId: string, stats: DashboardStats) => {
  * REAL-TIME STATS SUBSCRIPTION
  */
 export const subscribeToUserStats = (userId: string, onUpdate: (stats: DashboardStats) => void) => {
+  if (!supabase) return { unsubscribe: () => {} };
+
   return supabase
     .channel(`stats-${userId}`)
     .on(

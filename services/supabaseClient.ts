@@ -4,8 +4,16 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+let supabaseInstance: any = null;
+
 if (!supabaseUrl || !supabaseKey) {
-  console.warn('Supabase credentials missing. Check your .env file.');
+  console.warn('⚠️ Supabase credentials missing. Check your .env file or Vercel Environment Variables. Features relying on the database will be disabled.');
+} else {
+  try {
+    supabaseInstance = createClient(supabaseUrl, supabaseKey);
+  } catch (error) {
+    console.error('❌ Failed to initialize Supabase:', error);
+  }
 }
 
-export const supabase = createClient(supabaseUrl || '', supabaseKey || '');
+export const supabase = supabaseInstance;
