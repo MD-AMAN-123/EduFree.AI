@@ -306,28 +306,27 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-50 font-sans overflow-hidden transition-colors duration-200 relative">
-      <Sidebar
-        currentView={currentView}
-        onChangeView={(view) => handleNavigate(view)}
+    <div className="flex bg-slate-50 dark:bg-slate-950 font-sans min-h-screen text-slate-900 dark:text-slate-100 transition-colors duration-300">
+      <Sidebar 
+        currentView={currentView} 
+        onChangeView={setCurrentView}
         isMobileMenuOpen={isMobileMenuOpen}
         setIsMobileMenuOpen={setIsMobileMenuOpen}
         user={user}
         onLogout={handleLogout}
-        onUpdateUser={handleUpdateUser}
+        onUpdateUser={setUser}
       />
-
-      <main className="flex-1 overflow-auto w-full pt-16 md:pt-0 pb-20 md:pb-0">
-        {renderView()}
+      
+      <main className="flex-1 overflow-y-auto relative h-screen">
+        <div className="p-4 md:p-8 max-w-7xl mx-auto">
+          {renderView()}
+        </div>
+        
+        {/* Floating Background Decorations (Parity with Educlarity) */}
+        <div className="fixed top-0 right-0 -z-10 w-[500px] h-[500px] opacity-10 pointer-events-none">
+          <div className="absolute top-0 right-0 w-full h-full bg-indigo-500 rounded-full blur-[120px] -mr-64 -mt-64"></div>
+        </div>
       </main>
-
-      {/* Premium Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t dark:border-slate-800 z-50 px-6 flex items-center justify-between pb-4 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
-        {[
-          { id: AppView.DASHBOARD, icon: Layout, label: 'Home' },
-          { id: AppView.CONCEPT_COACH, icon: MessageCircle, label: 'Coach' },
-          { id: AppView.DOUBT_SOLVER, icon: Camera, label: 'Solver' },
-          { id: AppView.EXAM_ARENA, icon: PenTool, label: 'Exams' },
           { id: 'more', icon: Menu, label: 'More' },
         ].map((item) => {
           const Icon = item.icon;

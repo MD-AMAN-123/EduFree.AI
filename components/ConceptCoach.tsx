@@ -325,42 +325,27 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
       {/* Chat Area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((msg) => (
-          <div key={msg.id} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-            <div className={`max-w-[85%] md:max-w-[70%] rounded-2xl p-4 shadow-sm ${msg.role === 'user'
-              ? 'bg-indigo-600 text-white rounded-br-none'
-              : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border dark:border-slate-700 rounded-bl-none'
+          <div key={msg.id} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'} animate-slide-in`}>
+            <div className={`max-w-[85%] md:max-w-[70%] rounded-[1.5rem] p-5 shadow-lg border-2 ${msg.role === 'user'
+              ? 'bg-indigo-600 text-white border-indigo-500 rounded-tr-none'
+              : 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border-white dark:border-slate-800 rounded-tl-none'
               }`}>
-              {msg.text && <p className="leading-relaxed whitespace-pre-wrap" dir="auto">{msg.text}</p>}
+              {msg.text && <p className="leading-relaxed whitespace-pre-wrap font-medium" dir="auto">{msg.text}</p>}
 
               {msg.imageData && (
-                <div className="mt-3">
+                <div className="mt-4 rounded-2xl overflow-hidden border-2 border-indigo-100 dark:border-indigo-900/30">
                   <img
                     src={`data:image/png;base64,${msg.imageData}`}
                     alt="Visual Aid"
-                    className="rounded-lg border dark:border-slate-600 shadow-sm w-full h-auto"
+                    className="w-full h-auto"
                   />
                 </div>
               )}
-
-              {msg.isAudio && (
-                <button
-                  onClick={() => speakText(msg.text)}
-                  className="mt-2 flex items-center gap-2 text-xs bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 px-3 py-1.5 rounded-full hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors w-fit"
-                >
-                  <Volume2 size={14} /> Replay Voice
-                </button>
-              )}
             </div>
-
-            {/* Visual Aid Trigger */}
-            {msg.role === 'model' && !msg.imageData && !msg.isAudio && (
-              <button
-                onClick={handleGenerateVisual}
-                className="mt-1 ml-2 text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 flex items-center gap-1"
-              >
-                <ImageIcon size={12} /> Visualize this
-              </button>
-            )}
+            
+            <span className="text-[10px] mt-1 mx-2 font-bold text-slate-400 uppercase tracking-tighter">
+              {msg.role === 'user' ? 'Sent by You' : 'EduFree Assistant'}
+            </span>
           </div>
         ))}
         {(isModelLoading || isProcessing) && (

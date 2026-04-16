@@ -3,131 +3,36 @@
 
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/png" href="logo.jpg" />
-  <link rel="apple-touch-icon" href="logo.jpg" />
+  <link rel="icon" type="image/png" href="/logo-SxfyjC6n.jpg" />
+  <link rel="apple-touch-icon" href="/logo-SxfyjC6n.jpg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="EduFree.AI - Personalized, AI-powered learning ecosystem that works even offline." />
+  
   <title>EduFree.AI | Personalized Learning</title>
-  <!-- Tailwind removed from CDN to prevent production warnings. Project now uses Vite-processed styles. -->
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            slate: {
-              950: '#020617',
-            }
-          }
-        }
-      }
-    }
-  </script>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
-    rel="stylesheet">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
   <style>
+    /* Critical base styles to prevent FOUC (Flash of Unstyled Content) */
+    :root {
+      background-color: #020617; /* Matches slate-950 */
+    }
     body {
+      margin: 0;
+      padding: 0;
       font-family: 'Inter', sans-serif;
-      background-color: #f8fafc;
-      color: #0f172a;
+      overflow-x: hidden;
     }
-
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6 {
-      font-family: 'Poppins', sans-serif;
-    }
-
-    /* Premium Glassmorphism */
-    .glass {
-      background: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .dark .glass {
-      background: rgba(30, 41, 59, 0.7);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    /* Premium Gradients */
-    .bg-gradient-premium {
-      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-    }
-
-    .text-gradient {
-      background: linear-gradient(135deg, #4f46e5 0%, #10b981 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    /* Custom scrollbar */
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: #4f46e5;
-      border-radius: 10px;
-    }
-
-    .dark body {
-      background-color: #0f172a;
-      color: #f8fafc;
-    }
-
-    /* Animations */
-    @keyframes fade-in {
-      from {
-        opacity: 0;
-      }
-
-      to {
-        opacity: 1;
-      }
-    }
-
-    @keyframes slide-in-bottom {
-      from {
-        transform: translateY(10px);
-        opacity: 0;
-      }
-
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
-    }
-
-    .animate-fade-in {
-      animation: fade-in 0.5s ease-out forwards;
-    }
-
-    .animate-in {
-      animation-duration: 500ms;
-      animation-fill-mode: both;
-    }
-
-    .fade-in {
-      animation-name: fade-in;
-    }
-
-    .slide-in-from-bottom-2 {
-      animation-name: slide-in-bottom;
+    #root {
+      min-height: 100vh;
     }
   </style>
-
 </head>
 
-<body>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased">
   <div id="root"></div>
   <script type="module" src="/index.tsx"></script>
 </body>

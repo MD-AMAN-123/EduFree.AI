@@ -100,6 +100,21 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, isMobileMe
                 </button>
               );
             })}
+            {/* Exam Streak Card (Parity with Educlarity) */}
+            <div className="mx-2 mt-6 p-4 premium-gradient rounded-3xl text-white shadow-lg overflow-hidden relative group">
+              <div className="absolute top-0 right-0 p-2 opacity-20 transform translate-x-2 -translate-y-2 group-hover:scale-110 transition-transform">
+                <Activity size={80} />
+              </div>
+              <p className="text-[10px] font-bold uppercase tracking-widest opacity-80 mb-1">Current Streak</p>
+              <div className="flex items-center gap-2 mb-3">
+                <Flame className="text-orange-400 fill-orange-400" size={24} />
+                <span className="text-2xl font-black italic">14 DAYS</span>
+              </div>
+              <div className="relative h-1.5 w-full bg-white/20 rounded-full overflow-hidden">
+                <div className="absolute inset-y-0 left-0 bg-white rounded-full transition-all duration-1000" style={{ width: '70%' }}></div>
+              </div>
+              <p className="text-[10px] mt-2 font-bold opacity-90">3 days to next reward! 🎁</p>
+            </div>
           </nav>
           
           <div className="p-4 border-t dark:border-slate-800 space-y-4">
