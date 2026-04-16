@@ -21,6 +21,10 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
     setIsLoading(true);
 
     try {
+      if (!supabase) {
+        throw new Error("Database connection is not configured. Please use 'Continue as Guest' or check your environment variables.");
+      }
+
       if (isLogin) {
         // --- Supabase Sign In ---
         const { data, error } = await supabase.auth.signInWithPassword({
