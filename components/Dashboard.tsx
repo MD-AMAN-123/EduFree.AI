@@ -188,7 +188,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, stats, onNavigate }) => {
                 Live Tracking
               </div>
             </div>
-            <div className="h-64">
+            <div className="h-64 min-h-[256px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={activityData}>
                   <XAxis dataKey="day" axisLine={false} tickLine={false} stroke="#94a3b8" />
@@ -206,7 +206,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, stats, onNavigate }) => {
           {/* Circular Progress - Syllabus Coverage */}
           <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border dark:border-slate-700 shadow-sm">
             <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-4">Syllabus Coverage</h3>
-            <div className="h-64 relative">
+            <div className="h-64 min-h-[256px] relative">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie

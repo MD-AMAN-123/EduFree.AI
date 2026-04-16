@@ -70,7 +70,7 @@ const SmartAnalytics: React.FC<SmartAnalyticsProps> = ({ stats }) => {
               Syllabus Coverage
             </h3>
           </div>
-          <div className="h-[300px] w-full">
+          <div className="h-[350px] min-h-[350px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={performanceData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
@@ -93,7 +93,7 @@ const SmartAnalytics: React.FC<SmartAnalyticsProps> = ({ stats }) => {
               Study Time distribution
             </h3>
           </div>
-          <div className="h-[300px] w-full">
+          <div className="h-[350px] min-h-[350px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={growthData}>
                 <defs>

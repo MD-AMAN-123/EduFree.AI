@@ -13,7 +13,7 @@ import {
 
 /* ===============================
    ENV SETUP
-================================ */
+ ================================ */
 
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
@@ -21,13 +21,13 @@ const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
 // Import offline service for transparent fallback
 import { offlineAIService } from "./offlineAiService";
 
-const DEFAULT_MODEL = "gemini-1.5-flash-latest";
-const FALLBACK_MODEL = "gemini-1.5-flash"; 
+const DEFAULT_MODEL = "gemini-1.5-flash"; 
+const FALLBACK_MODEL = "gemini-pro"; 
 const PRO_MODEL = "gemini-1.5-pro"; 
 
 /* ===============================
    PROMPTS & SYSTEM INSTRUCTIONS
-================================ */
+ ================================ */
 
 const COACH_SYSTEM_INSTRUCTION = (mode: CoachMode, language: Language, bot?: StudyBot) => `
 You are ${bot?.name || "EduFree AI Coach"}, a brilliant, empathetic, and world-class learning assistant for the EduFree.AI platform. 
@@ -110,7 +110,7 @@ Return ONLY the JSON. No codes blocks.
 
 /* ===============================
    SAFE PARSE
-================================ */
+ ================================ */
 
 function safeParse<T>(text: string | undefined, fallback: T): T {
   if (!text) return fallback;
@@ -126,7 +126,7 @@ function safeParse<T>(text: string | undefined, fallback: T): T {
 
 /* ===============================
    COACH
-================================ */
+ ================================ */
 
 export async function generateCoachResponse(
   history: ChatMessage[],
@@ -260,7 +260,7 @@ export async function* generateCoachResponseStream(
 
 /* ===============================
    QUIZ
-================================ */
+ ================================ */
 
 export async function generateQuiz(
   topic: string,
@@ -282,29 +282,31 @@ export async function generateQuiz(
     const text = res.response.text();
     const questions = safeParse<QuizQuestion[]>(text, []);
 
-    // If generation failed or empty, return default mock questions for offline/fallback
+    // If generation failed or empty, return default mock questions for online/fallback
     if (questions.length === 0) {
       return [
-        { id: 1, question: `Explain a core concept in ${topic}`, options: ["Option A", "Option B", "Option C", "Option D"], correctAnswerIndex: 0, explanation: "Self-assessment mode: think through the logic." }
+        {
+          id: 1,
+          question: `Could not reach AI for ${topic}. Try again or check connection.`,
+          options: ["N/A"],
+          correctAnswerIndex: 0,
+          explanation: "Connecting to AI... please try again."
+        }
       ];
     }
 
-    return questions.map((q, i) => ({ ...q, id: q.id || i }));
-
-  } catch (error: any) {
+    return questions;
+  } catch (error) {
     console.error("Quiz Generation Error:", error);
-    return [{ id: 1, question: `Could not reach AI for ${topic}. Try again or check connection.`, options: ["N/A"], correctAnswerIndex: 0, explanation: "Connection error fallback." }];
+    return [];
   }
 }
 
 /* ===============================
    LEARNING PATH
-================================ */
+ ================================ */
 
-export async function generateLearningPath(
-  subject: string
-): Promise<LearningNode[]> {
-
+export async function generateLearningPath(subject: string): Promise<LearningNode[]> {
   if (!genAI || !navigator.onLine) return generateOfflineLearningPath(subject);
 
   try {
@@ -313,27 +315,24 @@ export async function generateLearningPath(
     const path = safeParse<LearningNode[]>(res.response.text(), []);
     return path.length > 0 ? path : generateOfflineLearningPath(subject);
   } catch (error) {
+    console.error("Learning Path Error:", error);
     return generateOfflineLearningPath(subject);
   }
 }
 
 function generateOfflineLearningPath(subject: string): LearningNode[] {
   return [
-    { id: '1', title: `Foundations of ${subject}`, description: `Introduction to key concepts and core terminology in ${subject}.`, status: 'UNLOCKED', difficulty: 'Beginner', rationale: 'Essential baseline knowledge.' },
-    { id: '2', title: `Core Principles`, description: `Diving deeper into the mechanics and applications of ${subject}.`, status: 'LOCKED', difficulty: 'Intermediate', rationale: 'Building on the basics.' },
-    { id: '3', title: `Advanced Mastery`, description: `Complex problem solving and advanced theory in ${subject}.`, status: 'LOCKED', difficulty: 'Advanced', rationale: 'Achieving expert-level understanding.' }
+    { id: '1', title: `Introduction to ${subject}`, description: 'Fundamentals and core principles.', status: 'UNLOCKED', difficulty: 'Beginner', rationale: 'Essential first step.' },
+    { id: '2', title: 'Advanced Concepts', description: 'Deep dive into complex topics.', status: 'LOCKED', difficulty: 'Intermediate', rationale: 'Building on basics.' },
+    { id: '3', title: 'Mastery & Beyond', description: 'Final project and application.', status: 'LOCKED', difficulty: 'Advanced', rationale: 'Final evaluation.' },
   ];
 }
 
 /* ===============================
-   DASHBOARD & TEACHER
-================================ */
+   DASHBOARD / ANALYTICS
+ ================================ */
 
-export async function generateDashboardInsights(
-  userName: string,
-  stats: DashboardStats
-): Promise<AIInsight[]> {
-
+export async function generateDailyInsights(userName: string, stats: DashboardStats): Promise<AIInsight[]> {
   if (!genAI) return [];
 
   try {
@@ -341,18 +340,16 @@ export async function generateDashboardInsights(
     const res = await model.generateContent(DASHBOARD_INSIGHTS_PROMPT(userName, stats));
     const text = res.response.text();
 
-    return safeParse<AIInsight[]>(text, []);
-
+    return safeParse<AIInsight[]>(text, [
+      { title: "Continue Learning", description: "You are doing great! Keep up the daily streak.", type: "success" }
+    ]);
   } catch (error) {
     console.error("Insight Generation Error:", error);
     return [];
   }
 }
 
-export async function generateTeacherInsights(
-  classDataJson: string
-): Promise<TeacherInsight[]> {
-
+export async function generateTeacherInsights(classDataJson: string): Promise<TeacherInsight[]> {
   if (!genAI) return [];
 
   try {
@@ -360,17 +357,16 @@ export async function generateTeacherInsights(
     const prompt = `
       Analyze this class performance data:
       ${classDataJson}
-
-      Return a JSON array of TeacherInsight objects:
-      interface TeacherInsight {
-        topic: string;
-        avgScore: number;
-        difficultyLevel: string;
-        recommendation: string;
+      
+      Return ONLY a JSON array of objects:
+      {
+        "title": "Short Heading",
+        "description": "Insight text",
+        "type": "success" | "warning" | "info",
+        "affectedStudents": number
       }
-      Provide actionable pedagogical advice for the teacher.
-      Return ONLY the JSON.
     `;
+
     const res = await model.generateContent(prompt);
     return safeParse<TeacherInsight[]>(res.response.text(), []);
   } catch (error) {
@@ -380,13 +376,10 @@ export async function generateTeacherInsights(
 }
 
 /* ===============================
-   DOUBT SOLVER & SUPPORT
-================================ */
+   DOUBT SOLVER (VISION)
+ ================================ */
 
-export async function solveQuestionFromImage(
-  base64Image: string
-): Promise<{ topic: string, answer: string, steps: string[] }> {
-
+export async function solveQuestionFromImage(imageData: string): Promise<{ topic: string, answer: string, steps: string[] }> {
   if (!genAI) throw new Error("AI Service Unavailable");
 
   try {
@@ -415,24 +408,26 @@ export async function solveQuestionFromImage(
       prompt,
       {
         inlineData: {
-          data: base64Image,
+          data: imageData,
           mimeType: "image/jpeg"
         }
       }
     ]);
 
-    const text = result.response.text();
-    return safeParse<{ topic: string, answer: string, steps: string[] }>(text, {
+    return safeParse(result.response.text(), {
       topic: "General",
-      answer: "Could not determine",
-      steps: ["Please try capturing a clearer image of the question."]
+      answer: "Error processing image",
+      steps: ["Please try with a clearer image or check connection."]
     });
-
   } catch (error) {
-    console.error("Doubt Solver Error:", error);
+    console.error("Vision Error:", error);
     throw error;
   }
 }
+
+/* ===============================
+   CUSTOMER SUPPORT (CHAT)
+ ================================ */
 
 export async function generateSupportResponse(
   history: any[],
@@ -445,15 +440,20 @@ export async function generateSupportResponse(
 
   try {
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
+      model: DEFAULT_MODEL,
       systemInstruction: "You are the EduFree Support Assistant. Help users with technical issues, account queries, and classroom management if they are teachers."
     });
+
+    const chatHistory = history.map(msg => ({
+      role: msg.role === 'model' ? 'model' : 'user',
+      parts: [{ text: msg.text }]
+    }));
 
     const prompt = `
       User Message: ${currentMessage}
       ${students ? `Context (Student List): ${JSON.stringify(students)}` : ""}
       
-      If the user wants to ADD or DELETE a student, detect the intent and return a tool call if specified.
+      If the user wants to add/remove a student, explain they can use the UI buttons.
       Otherwise, reply normally to the user.
     `;
 
@@ -512,18 +512,18 @@ export async function* generateSupportResponseStream(
     for await (const chunk of result.stream) {
       yield chunk.text();
     }
-  } catch (error) {
-    console.error("Support Stream Error:", error);
-    yield "System error encountered.";
+  } catch (err: any) {
+    console.error("Support Stream Error:", err);
+    yield "I'm having trouble answering right now.";
   }
 }
 
 /* ===============================
-   VISUAL AID
-================================ */
+   DASHBOARD VISUAL AID
+ ================================ */
 
 export async function generateVisualAid(topic: string): Promise<string> {
-  if (!genAI) return "AI Service Unavailable";
+  if (!genAI) return "Visual service offline.";
 
   try {
     const model = genAI.getGenerativeModel({
@@ -540,7 +540,7 @@ export async function generateVisualAid(topic: string): Promise<string> {
 
 /* ===============================
    ORIGINALITY
-================================ */
+ ================================ */
 
 export const checkOriginality = async (text: string): Promise<{ score: number, analysis: string }> => {
   if (!genAI) {
@@ -579,7 +579,7 @@ export const checkOriginality = async (text: string): Promise<{ score: number, a
 
 /* ===============================
    UTIL
-================================ */
+ ================================ */
 
 export function blobToBase64(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
