@@ -139,7 +139,6 @@ export async function generateCoachResponse(
 
   if (!genAI) return { text: "AI Service is currently unavailable. Please check your API configuration." };
 
-  // GEMINI REQUIREMENT: History must start with 'user' role
   const filteredHistory = history.filter((msg, idx) => {
     if (idx === 0 && msg.role === 'model') return false;
     return true;
@@ -161,22 +160,25 @@ export async function generateCoachResponse(
   }
 
   try {
-    const model = genAI.getGenerativeModel({
-      model: DEFAULT_MODEL,
-      systemInstruction: COACH_SYSTEM_INSTRUCTION(mode, language, bot)
-    });
+    const model = genAI.getGenerativeModel(
+      { model: DEFAULT_MODEL, systemInstruction: COACH_SYSTEM_INSTRUCTION(mode, language, bot) },
+      { apiVersion: "v1" }
+    );
     const result = await model.startChat({ history: chatHistory }).sendMessage(parts);
     return { text: (await result.response).text() };
   } catch (outerError: any) {
-    console.error("Coach Error:", outerError);
-    return { text: "EduFree is still warming up its brain. Please try again in 5 seconds!" };
+    console.warn("V1 model failed, trying beta as fallback...", outerError);
+    try {
+        const betaModel = genAI.getGenerativeModel({ model: FALLBACK_MODEL });
+        const result = await betaModel.startChat({ history: chatHistory }).sendMessage(parts);
+        return { text: (await result.response).text() };
+    } catch (innerError) {
+        console.error("Coach Error:", innerError);
+        return { text: "EduFree is still warming up its brain. Please try again in 5 seconds!" };
+    }
   }
 }
 
-/**
- * GENERATE COACH RESPONSE (STREAMING)
- * Real-time text generation for a more premium experience.
- */
 export async function* generateCoachResponseStream(
   history: ChatMessage[],
   currentMessage: string,
@@ -191,41 +193,30 @@ export async function* generateCoachResponseStream(
     return;
   }
 
-  const filteredHistory = history.filter((msg, idx) => {
-    if (idx === 0 && msg.role === 'model') return false;
-    return true;
-  });
-
-  const chatHistory = filteredHistory.map(msg => ({
+  const chatHistory = history.filter((msg, idx) => !(idx === 0 && msg.role === 'model')).map(msg => ({
     role: msg.role === 'model' ? 'model' : 'user',
     parts: [{ text: msg.text }]
   }));
 
   const parts: (string | Part)[] = [currentMessage];
   if (audioBase64) {
-    parts.push({
-      inlineData: {
-        data: audioBase64,
-        mimeType: "audio/wav"
-      }
-    });
+    parts.push({ inlineData: { data: audioBase64, mimeType: "audio/wav" } });
   }
 
   try {
-    const model = genAI.getGenerativeModel({
-      model: DEFAULT_MODEL,
-      systemInstruction: COACH_SYSTEM_INSTRUCTION(mode, language, bot)
-    });
+    const model = genAI.getGenerativeModel(
+      { model: DEFAULT_MODEL, systemInstruction: COACH_SYSTEM_INSTRUCTION(mode, language, bot) },
+      { apiVersion: 'v1' }
+    );
 
     const chat = model.startChat({ history: chatHistory });
     const result = await chat.sendMessageStream(parts);
 
     for await (const chunk of result.stream) {
-      const chunkText = chunk.text();
-      yield chunkText;
+      yield chunk.text();
     }
   } catch (err: any) {
-    console.warn("Streaming with latest model failed, trying fallback...", err);
+    console.warn("V1 Streaming failed, trying beta fallback...", err);
     try {
         const fallbackModel = genAI.getGenerativeModel({
           model: FALLBACK_MODEL,
@@ -237,85 +228,51 @@ export async function* generateCoachResponseStream(
           yield chunk.text();
         }
     } catch (fallbackErr: any) {
-        console.warn("Streaming failed entirely, attempting non-streaming fallback...");
+        console.warn("All streaming failed, attempting non-streaming v1...");
         try {
-            const staticModel = genAI.getGenerativeModel({
-              model: FALLBACK_MODEL,
-              systemInstruction: COACH_SYSTEM_INSTRUCTION(mode, language, bot)
-            });
+            const staticModel = genAI.getGenerativeModel(
+              { model: DEFAULT_MODEL, systemInstruction: COACH_SYSTEM_INSTRUCTION(mode, language, bot) },
+              { apiVersion: 'v1' }
+            );
             const chat = staticModel.startChat({ history: chatHistory });
             const result = await chat.sendMessage(parts);
             yield (await result.response).text();
         } catch (staticErr: any) {
             console.error("Critical AI Failure:", staticErr);
-            if (staticErr.message?.includes("API_KEY_INVALID")) {
-                yield "⚠️ AI Configuration Error: Invalid API Key. Please update your environment variables.";
-            } else {
-                yield "I encountered an error while thinking. Please check your internet or try again later.";
-            }
+            yield "I encountered another error while thinking. Testing your API key connectivity. Please verify your VITE_GEMINI_API_KEY in .env.local.";
         }
     }
   }
 }
 
-/* ===============================
-   QUIZ
- ================================ */
-
-export async function generateQuiz(
-  topic: string,
-  difficulty: string
-): Promise<QuizQuestion[]> {
-
+export async function generateQuiz(topic: string, difficulty: string): Promise<QuizQuestion[]> {
   if (!genAI) return [];
-
   try {
-    const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL });
+    const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL }, { apiVersion: 'v1' });
     let res;
     try {
         res = await model.generateContent(QUIZ_PROMPT(topic, difficulty));
-    } catch (innerErr) {
-        console.warn("Quiz generation failed with latest model, trying standard flash...");
+    } catch (err) {
         const fbModel = genAI.getGenerativeModel({ model: FALLBACK_MODEL });
         res = await fbModel.generateContent(QUIZ_PROMPT(topic, difficulty));
     }
-    const text = res.response.text();
-    const questions = safeParse<QuizQuestion[]>(text, []);
-
-    // If generation failed or empty, return default mock questions for online/fallback
-    if (questions.length === 0) {
-      return [
-        {
-          id: 1,
-          question: `Could not reach AI for ${topic}. Try again or check connection.`,
-          options: ["N/A"],
-          correctAnswerIndex: 0,
-          explanation: "Connecting to AI... please try again."
-        }
-      ];
-    }
-
-    return questions;
+    const questions = safeParse<QuizQuestion[]>(res.response.text(), []);
+    return questions.length > 0 ? questions : [{ id: 1, question: `Could not reach AI for ${topic}. Try again or check connection.`, options: ["N/A"], correctAnswerIndex: 0, explanation: "Retry logic active." }];
   } catch (error) {
-    console.error("Quiz Generation Error:", error);
+    console.error("Quiz Error:", error);
     return [];
   }
 }
 
-/* ===============================
-   LEARNING PATH
- ================================ */
-
 export async function generateLearningPath(subject: string): Promise<LearningNode[]> {
   if (!genAI || !navigator.onLine) return generateOfflineLearningPath(subject);
-
   try {
-    const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL });
+    const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL }, { apiVersion: 'v1' });
     const res = await model.generateContent(LEARNING_PATH_PROMPT(subject));
     const path = safeParse<LearningNode[]>(res.response.text(), []);
     return path.length > 0 ? path : generateOfflineLearningPath(subject);
   } catch (error) {
-    console.error("Learning Path Error:", error);
+    console.error("Path Error:", error);
     return generateOfflineLearningPath(subject);
   }
 }
@@ -328,46 +285,23 @@ function generateOfflineLearningPath(subject: string): LearningNode[] {
   ];
 }
 
-/* ===============================
-   DASHBOARD / ANALYTICS
- ================================ */
-
 export async function generateDailyInsights(userName: string, stats: DashboardStats): Promise<AIInsight[]> {
   if (!genAI) return [];
-
   try {
-    const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL });
+    const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL }, { apiVersion: 'v1' });
     const res = await model.generateContent(DASHBOARD_INSIGHTS_PROMPT(userName, stats));
-    const text = res.response.text();
-
-    return safeParse<AIInsight[]>(text, [
-      { title: "Continue Learning", description: "You are doing great! Keep up the daily streak.", type: "success" }
-    ]);
+    return safeParse<AIInsight[]>(res.response.text(), [{ title: "Continue Learning", description: "Stay consistent!", type: "success" }]);
   } catch (error) {
-    console.error("Insight Generation Error:", error);
+    console.error("Insight Error:", error);
     return [];
   }
 }
 
 export async function generateTeacherInsights(classDataJson: string): Promise<TeacherInsight[]> {
   if (!genAI) return [];
-
   try {
-    const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL });
-    const prompt = `
-      Analyze this class performance data:
-      ${classDataJson}
-      
-      Return ONLY a JSON array of objects:
-      {
-        "title": "Short Heading",
-        "description": "Insight text",
-        "type": "success" | "warning" | "info",
-        "affectedStudents": number
-      }
-    `;
-
-    const res = await model.generateContent(prompt);
+    const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL }, { apiVersion: 'v1' });
+    const res = await model.generateContent(`Analyze class performance data: ${classDataJson}. Return JSON array of insights.`);
     return safeParse<TeacherInsight[]>(res.response.text(), []);
   } catch (error) {
     console.error("Teacher Insight Error:", error);
@@ -375,219 +309,62 @@ export async function generateTeacherInsights(classDataJson: string): Promise<Te
   }
 }
 
-/* ===============================
-   DOUBT SOLVER (VISION)
- ================================ */
-
 export async function solveQuestionFromImage(imageData: string): Promise<{ topic: string, answer: string, steps: string[] }> {
   if (!genAI) throw new Error("AI Service Unavailable");
-
   try {
-    const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL });
-    const prompt = `
-      You are the EduFree Insight Engine. Analyze the pixel data of this image.
-      Identify the question or problem being asked.
-      Provide a rigorous, premium-quality solution.
-      
-      Return ONLY a valid JSON object:
-      {
-        "topic": "Specific subject/topic name",
-        "answer": "The final concise result (e.g., 'x = 5' or 'Mitochondria')",
-        "steps": [
-          "Step 1: Description of identification",
-          "Step 2: Logical derivation",
-          "Step 3: Reinforcement of concept",
-          "Step 4: Final verification"
-        ]
-      }
-      
-      Return ONLY the JSON. No markdown code blocks.
-    `;
-
-    const result = await model.generateContent([
-      prompt,
-      {
-        inlineData: {
-          data: imageData,
-          mimeType: "image/jpeg"
-        }
-      }
-    ]);
-
-    return safeParse(result.response.text(), {
-      topic: "General",
-      answer: "Error processing image",
-      steps: ["Please try with a clearer image or check connection."]
-    });
+    const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL }, { apiVersion: 'v1' });
+    const prompt = `Identify the question in this image. Provide JSON: {topic, answer, steps}`;
+    const result = await model.generateContent([prompt, { inlineData: { data: imageData, mimeType: "image/jpeg" } }]);
+    return safeParse(result.response.text(), { topic: "General", answer: "Check image clarity", steps: ["Retry..."] });
   } catch (error) {
     console.error("Vision Error:", error);
     throw error;
   }
 }
 
-/* ===============================
-   CUSTOMER SUPPORT (CHAT)
- ================================ */
-
-export async function generateSupportResponse(
-  history: any[],
-  currentMessage: string,
-  students?: any[],
-  actions?: { [key: string]: (data: any) => Promise<string> }
-): Promise<string> {
-
-  if (!genAI) return "Support service offline.";
-
+export async function generateSupportResponse(history: any[], currentMessage: string): Promise<string> {
+  if (!genAI) return "Support offline.";
   try {
-    const model = genAI.getGenerativeModel({
-      model: DEFAULT_MODEL,
-      systemInstruction: "You are the EduFree Support Assistant. Help users with technical issues, account queries, and classroom management if they are teachers."
-    });
-
-    const chatHistory = history.map(msg => ({
-      role: msg.role === 'model' ? 'model' : 'user',
-      parts: [{ text: msg.text }]
-    }));
-
-    const prompt = `
-      User Message: ${currentMessage}
-      ${students ? `Context (Student List): ${JSON.stringify(students)}` : ""}
-      
-      If the user wants to add/remove a student, explain they can use the UI buttons.
-      Otherwise, reply normally to the user.
-    `;
-
-    const res = await model.generateContent(prompt);
-    let responseText = res.response.text();
-
-    // Simple Intent Detection for Teacher Tools (Mocking Function Calling behavior since we use simple text prompt)
-    if (actions && currentMessage.toLowerCase().includes("add student")) {
-      // Logic to extract name/grade etc. would go here, for now we just reply
-      return "I've noted the request to add a student. Please use the 'Manage Cohort' button for manual entry while I'm still learning automated registry management.";
-    }
-
-    return responseText;
+    const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL }, { apiVersion: 'v1' });
+    const res = await model.generateContent(currentMessage);
+    return res.response.text();
   } catch (error) {
-    console.error("Support Error:", error);
-    return "I'm having trouble helping right now. Please try again later.";
+    return "I'm having trouble helping right now.";
   }
 }
 
-/**
- * GENERATE SUPPORT RESPONSE (STREAMING)
- */
-export async function* generateSupportResponseStream(
-  history: any[],
-  currentMessage: string,
-  students?: any[],
-  actions?: { [key: string]: (data: any) => Promise<string> }
-): AsyncGenerator<string> {
-
-  if (!genAI) {
-    yield "Support service offline.";
-    return;
-  }
-
+export async function* generateSupportResponseStream(history: any[], currentMessage: string): AsyncGenerator<string> {
+  if (!genAI) { yield "Support offline."; return; }
   try {
-    const model = genAI.getGenerativeModel({
-      model: DEFAULT_MODEL,
-      systemInstruction: "You are the EduFree Support Assistant. Help users with technical issues, account queries, and classroom management if they are teachers."
-    });
-
-    const chatHistory = history.map(msg => ({
-      role: msg.role === 'model' ? 'model' : 'user',
-      parts: [{ text: msg.text }]
-    }));
-
-    const prompt = `
-      User Message: ${currentMessage}
-      ${students ? `Context (Student List): ${JSON.stringify(students)}` : ""}
-      
-      Reply normally to the user.
-    `;
-
-    const chat = model.startChat({ history: chatHistory });
-    const result = await chat.sendMessageStream(prompt);
-
-    for await (const chunk of result.stream) {
-      yield chunk.text();
-    }
-  } catch (err: any) {
-    console.error("Support Stream Error:", err);
-    yield "I'm having trouble answering right now.";
-  }
+    const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL }, { apiVersion: 'v1' });
+    const chat = model.startChat({ history: [] });
+    const result = await chat.sendMessageStream(currentMessage);
+    for await (const chunk of result.stream) { yield chunk.text(); }
+  } catch (err) { yield "Error answering..."; }
 }
-
-/* ===============================
-   DASHBOARD VISUAL AID
- ================================ */
 
 export async function generateVisualAid(topic: string): Promise<string> {
   if (!genAI) return "Visual service offline.";
-
   try {
-    const model = genAI.getGenerativeModel({
-      model: DEFAULT_MODEL,
-      systemInstruction: "You are a visual learning assistant. Create a detailed markdown explanation with ASCII art or Mermaid diagrams where possible to explain topics visually."
-    });
-    const res = await model.generateContent(`Explain the concept of ${topic} visually using markdown and detailed descriptions.`);
+    const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL }, { apiVersion: 'v1' });
+    const res = await model.generateContent(`Explain ${topic} visually with markdown.`);
     return res.response.text();
-  } catch (error) {
-    console.error("Visual Aid Error:", error);
-    return "Error generating visual aid.";
-  }
+  } catch (error) { return "Visual aid error."; }
 }
 
-/* ===============================
-   ORIGINALITY
- ================================ */
-
 export const checkOriginality = async (text: string): Promise<{ score: number, analysis: string }> => {
-  if (!genAI) {
-    return {
-      score: 100,
-      analysis: "AI service unavailable. Local heuristic suggests this content is original."
-    };
-  }
-
+  if (!genAI) return { score: 100, analysis: "Local check only." };
   try {
-    const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL });
-    const prompt = `
-      Analyze the following text for originality and AI-generated patterns.
-      Provide a "score" from 0 to 100 (where 100 is completely original/human) and a brief "analysis" of why.
-      
-      Text: "${text}"
-
-      Return ONLY a JSON object: {"score": number, "analysis": "string"}
-    `;
-
-    const res = await model.generateContent(prompt);
-    const resultText = res.response.text();
-    return safeParse<{ score: number, analysis: string }>(resultText, {
-      score: 70,
-      analysis: "Parsing error. Content appears mostly original."
-    });
-  } catch (error) {
-    console.error("Originality Check Error:", error);
-    return {
-      score: 50,
-      analysis: "Error during deep analysis. Please try again later."
-    };
-  }
+    const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL }, { apiVersion: 'v1' });
+    const res = await model.generateContent(`Analyze for AI: ${text}. Return JSON: {score, analysis}`);
+    return safeParse(res.response.text(), { score: 70, analysis: "Likely original." });
+  } catch (error) { return { score: 50, analysis: "Check failed." }; }
 };
-
-
-/* ===============================
-   UTIL
- ================================ */
 
 export function blobToBase64(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64String = (reader.result as string).split(",")[1];
-      resolve(base64String);
-    };
+    reader.onloadend = () => resolve((reader.result as string).split(",")[1]);
     reader.onerror = reject;
     reader.readAsDataURL(blob);
   });

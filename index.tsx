@@ -8,6 +8,14 @@ if (!rootElement) {
   throw new Error("Could not find root element to mount to");
 }
 
+// Global error handler for ChunkLoadErrors (common on Vercel/Vite during deploys)
+window.addEventListener('error', (e) => {
+  if (e.message && (e.message.includes('ChunkLoadError') || e.message.includes('Loading chunk'))) {
+    console.warn('Chunk/Script load error detected. Attempting to reload page...');
+    window.location.reload();
+  }
+});
+
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <App />
