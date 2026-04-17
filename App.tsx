@@ -9,10 +9,12 @@ import TeacherDashboard from "./components/TeacherDashboard";
 import CreatorStudio from "./components/CreatorStudio";
 import AuthPage from "./components/AuthPage";
 import Leaderboard from "./components/Leaderboard";
+import AssignmentGenerator from "./components/AssignmentGenerator";
 import OfflineBanner from "./components/OfflineBanner";
 import { AppView, User, DashboardStats } from "./types";
 import { generateDashboardInsights } from "./services/geminiService";
 import { Layout, MessageCircle, Camera, PenTool, Menu } from "lucide-react";
+import { SpaceBackground } from "./components/SpaceBackground";
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<AppView>(AppView.DASHBOARD);
@@ -91,6 +93,8 @@ const App: React.FC = () => {
         return <CreatorStudio />;
       case AppView.LEADERBOARD:
         return <Leaderboard currentUserId={user?.id} />;
+      case AppView.ASSIGNMENT_GENERATOR:
+        return <AssignmentGenerator />;
       default:
         return <Dashboard user={user!} stats={stats} onNavigate={setCurrentView} />;
     }
@@ -101,7 +105,9 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="flex bg-slate-50 dark:bg-slate-950 font-sans min-h-screen text-slate-900 dark:text-slate-100 transition-colors duration-300 relative overflow-hidden">
+    <div className="dark">
+    <div className="flex bg-transparent dark:bg-transparent font-sans min-h-screen text-slate-900 dark:text-slate-100 transition-colors duration-300 relative overflow-hidden">
+      <SpaceBackground />
       <Sidebar 
         currentView={currentView} 
         onChangeView={setCurrentView}
@@ -154,6 +160,7 @@ const App: React.FC = () => {
           );
         })}
       </nav>
+    </div>
     </div>
   );
 };

@@ -22,6 +22,42 @@ EduFree.AI solves this by delivering a **fully offline AI learning ecosystem**.
 
 ## ✨ Features
 
+### 🔐 Student Authentication & Profile System
+* Secure login/signup system (offline-first sync-ready)
+* Personalized student profiles with progress tracking
+* Attractive, modern UI design for onboarding and dashboard
+
+### 📊 Real-Time Student Dashboard
+* Visual analytics of learning progress (charts, streaks, performance)
+* AI-driven insights (strengths, weaknesses, recommendations)
+* Activity tracking (lessons completed, quiz scores, time spent)
+
+### 🧠 AI-Powered Offline Learning Path Generator
+* Dynamically generates personalized learning paths
+* Adapts based on student performance and behavior
+* Works fully offline using local ML models
+
+### 📝 AI-Powered Offline Quiz Generator
+* Automatically generates quizzes from local content
+* Difficulty adjustment (easy → advanced)
+* Instant evaluation and feedback
+
+### 📚 AI-Powered Offline Assignment Generator
+* Generates assignments based on topics learned
+* Includes structured questions (short/long/problem-solving)
+* Enables self-assessment and practice
+
+### 👨‍🏫 Secure Teacher Dashboard
+* Role-based authentication (Teacher/Admin)
+* Monitor student performance and analytics
+* Assign content, quizzes, and track progress
+* Offline data sync capability for institutional use
+
+### 🌙 Immersive UI Upgrade (Dark Mode + 3D Experience)
+* Dark mode for better accessibility and modern feel
+* Integration of **Three.js** for interactive 3D backgrounds and animations
+* Futuristic learning interface design
+
 ### 📚 Offline Content Access
 
 * Preloaded educational resources
@@ -43,9 +79,11 @@ EduFree.AI solves this by delivering a **fully offline AI learning ecosystem**.
 
 ## 🛠️ Tech Stack
 
-* 📱 **Android Application** (Java/Kotlin)
-* 🧠 **Local Machine Learning Models** (on-device inference)
+* 📱 **Android App** (Kotlin/Java)
+* 🧠 **Local ML Models** (TinyML / TensorFlow Lite)
 * 💾 **SQLite Database** (offline storage)
+* 🎨 **Three.js** (3D UI/UX enhancements)
+* 🔐 **Secure Authentication System** (offline-first architecture)
 
 ---
 
@@ -117,4 +155,4 @@ This project is licensed under the MIT License.
 
 ## 💡 Tagline
 
-**"Empowering education beyond connectivity — because learning should never depend on the internet."**
+**"Redefining education with intelligence, immersion, and independence — where AI meets learning, even offline."** 🔥

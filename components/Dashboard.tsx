@@ -117,10 +117,11 @@ const Dashboard: React.FC<DashboardProps> = ({ user, stats, onNavigate, lastActi
       <StreakWarning lastActivityAt={lastActivityAt ?? null} streak={stats?.streak ?? 0} />
 
       {/* Quick Actions Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         {[
           { label: 'Ask AI Brain', icon: BrainCircuit, color: 'bg-indigo-600', view: AppView.CONCEPT_COACH },
           { label: 'Instant Quiz', icon: Zap, color: 'bg-amber-500', view: AppView.EXAM_ARENA },
+          { label: 'Assignments', icon: BrainCircuit, color: 'bg-sky-500', view: AppView.ASSIGNMENT_GENERATOR },
           { label: 'Scan Doubt', icon: Camera, color: 'bg-emerald-500', view: AppView.DOUBT_SOLVER },
           { label: 'Learning Path', icon: Award, color: 'bg-green-500', view: AppView.LEARNING_PATH },
         ].map((action, i) => (

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BookOpen, BarChart2, MessageCircle, PenTool, Layout, Leaf, Menu, X, Map, GraduationCap, LogOut, Moon, Sun, Camera, Activity, Trophy } from 'lucide-react';
+import { BookOpen, BarChart2, MessageCircle, PenTool, Layout, Leaf, Menu, X, Map, GraduationCap, LogOut, Moon, Sun, Camera, Activity, Trophy, FileText, Flame } from 'lucide-react';
 import { AppView, User, Language } from '../types';
 import { getLabel, persistLanguage, loadLanguage } from '../services/i18nService';
 
@@ -41,6 +41,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, isMobileMe
     { id: AppView.CONCEPT_COACH,    label: t('conceptCoach'),     icon: MessageCircle },
     { id: AppView.DOUBT_SOLVER,     label: t('doubtSolver'),      icon: Camera },
     { id: AppView.EXAM_ARENA,       label: t('examArena'),        icon: PenTool },
+    { id: AppView.ASSIGNMENT_GENERATOR, label: 'Assignments',     icon: FileText },
     { id: AppView.LEADERBOARD,      label: t('leaderboard'),      icon: Trophy },
     { id: AppView.SMART_ANALYTICS,  label: t('smartAnalytics'),   icon: Activity },
     { id: AppView.CREATOR_STUDIO,   label: t('creatorStudio'),    icon: BookOpen },
