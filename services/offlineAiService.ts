@@ -11,16 +11,17 @@ export class OfflineAIService {
   private isLoaded = false;
   private onProgressCallback?: (progress: number) => void;
 
-  constructor() {}
+  constructor() { }
 
   setOnProgress(callback: (progress: number) => void) {
     this.onProgressCallback = callback;
   }
 
   async isWebGPUSupported(): Promise<boolean> {
-    if (!navigator.gpu) return false;
+    const nav = navigator as any;
+    if (!nav.gpu) return false;
     try {
-      const adapter = await navigator.gpu.requestAdapter();
+      const adapter = await nav.gpu.requestAdapter();
       return !!adapter;
     } catch {
       return false;
