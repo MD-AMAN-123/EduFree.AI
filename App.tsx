@@ -13,9 +13,22 @@ import AssignmentGenerator from "./components/AssignmentGenerator";
 import OfflineBanner from "./components/OfflineBanner";
 import { AppView, User, DashboardStats } from "./types";
 import { generateDashboardInsights } from "./services/geminiService";
-import { Layout, MessageCircle, Camera, PenTool, Menu } from "lucide-react";
+import {
+  Home,
+  Layout,
+  MessageSquare,
+  Settings,
+  LogOut,
+  BookOpen,
+  Zap,
+  Globe,
+  Search,
+  Menu,
+  BrainCircuit,
+  Camera,
+  PenTool
+} from 'lucide-react';
 import { SpaceBackground } from "./components/SpaceBackground";
-import { motion, AnimatePresence } from "framer-motion";
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<AppView>(AppView.DASHBOARD);
@@ -130,20 +143,26 @@ const App: React.FC = () => {
           toggleDarkMode={() => setIsDarkMode(!isDarkMode)}
         />
 
+        {/* Mobile Header */}
+        <div className="md:hidden flex items-center justify-between p-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b dark:border-slate-800 sticky top-0 z-30">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+              <BrainCircuit className="text-white w-5 h-5" />
+            </div>
+            <span className="font-bold dark:text-white">EduFree.AI</span>
+          </div>
+          <button
+            onClick={() => setIsMobileMenuOpen(true)}
+            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+          >
+            <Menu className="text-slate-600 dark:text-slate-400" size={24} />
+          </button>
+        </div>
+
         <main className="flex-1 overflow-y-auto relative h-screen">
           <div className="p-4 md:p-8 max-w-7xl mx-auto pb-32 md:pb-8">
             <OfflineBanner />
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentView}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.3, ease: "easeOut" }}
-              >
-                {renderView()}
-              </motion.div>
-            </AnimatePresence>
+            {renderView()}
           </div>
 
           {/* Floating Background Decorations (Parity with Educlarity) */}
@@ -152,34 +171,25 @@ const App: React.FC = () => {
           </div>
         </main>
 
-        {/* Premium Mobile Bottom Navigation (Fixing Syntax Error) */}
+        {/* Premium Mobile Bottom Navigation */}
         <nav className="md:hidden fixed bottom-0 left-0 right-0 h-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t dark:border-slate-800 z-50 px-6 flex items-center justify-between pb-4 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
           {[
-            { id: AppView.DASHBOARD, icon: Layout, label: 'Home' },
-            { id: AppView.CONCEPT_COACH, icon: MessageCircle, label: 'Coach' },
-            { id: AppView.DOUBT_SOLVER, icon: Camera, label: 'Solver' },
-            { id: AppView.EXAM_ARENA, icon: PenTool, label: 'Exams' },
-            { id: 'more', icon: Menu, label: 'More' },
-          ].map((item) => {
-            const Icon = item.icon;
-            const isActive = currentView === item.id;
-            const isMore = item.id === 'more';
-
-            return (
-              <button
-                key={item.id}
-                onClick={() => isMore ? setIsMobileMenuOpen(true) : setCurrentView(item.id as AppView)}
-                className={`flex flex-col items-center gap-1 transition-all duration-300 ${isActive ? 'text-indigo-600 dark:text-indigo-400 scale-110' : 'text-slate-400 dark:text-slate-500'
-                  }`}
-              >
-                <div className={`p-2 rounded-xl transition-colors ${isActive ? 'bg-indigo-50 dark:bg-indigo-900/20' : ''}`}>
-                  <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
-                </div>
-                <span className="text-[10px] font-bold uppercase tracking-tighter">{item.label}</span>
-                {isActive && <div className="w-1 h-1 bg-indigo-600 dark:bg-indigo-400 rounded-full"></div>}
-              </button>
-            );
-          })}
+            { active: currentView === AppView.DASHBOARD, icon: Home, label: 'Home', view: AppView.DASHBOARD },
+            { active: currentView === AppView.LEARNING_PATH, icon: Layout, label: 'Path', view: AppView.LEARNING_PATH },
+            { active: currentView === AppView.CONCEPT_COACH, icon: MessageSquare, label: 'Coach', view: AppView.CONCEPT_COACH },
+            { active: currentView === AppView.DOUBT_SOLVER, icon: Camera, label: 'Ask', view: AppView.DOUBT_SOLVER },
+            { active: currentView === AppView.ASSIGNMENT_GENERATOR, icon: Zap, label: 'Exam', view: AppView.ASSIGNMENT_GENERATOR },
+          ].map((item) => (
+            <button
+              key={item.label}
+              onClick={() => setCurrentView(item.view)}
+              className={`flex flex-col items-center justify-center gap-1 flex-1 transition-all ${item.active ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400'
+                }`}
+            >
+              <item.icon size={20} className={item.active ? 'scale-110' : ''} />
+              <span className="text-[10px] font-bold uppercase tracking-tight">{item.label}</span>
+            </button>
+          ))}
         </nav>
       </div>
     </div>

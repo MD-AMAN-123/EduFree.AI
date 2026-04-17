@@ -103,3 +103,17 @@
 .animate-slide-in {
   animation: slideIn 0.3s ease-out forwards;
 }
+
+@layer utilities {
+  .mobile-safe-bottom {
+    @apply pb-24 md:pb-8;
+  }
+  
+  .responsive-btn {
+    @apply w-full md:w-auto px-6 py-4 rounded-2xl font-bold transition-all active:scale-95;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}

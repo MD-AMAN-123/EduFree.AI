@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import { CheckCircle, Clock, Award, Globe, Sparkles, BrainCircuit, Zap, Camera } from 'lucide-react';
 import { User, AppView, DashboardStats } from '../types';
-import { motion } from 'framer-motion';
 import LivePulse from './LivePulse';
 import StreakWarning from './StreakWarning';
 import LeaderboardWidget from './LeaderboardWidget';
@@ -22,23 +21,8 @@ const Dashboard: React.FC<DashboardProps> = ({ user, stats, onNavigate, lastActi
   const syllabusData = stats?.syllabusProgress || [];
   const activityData = stats?.weeklyActivity || [];
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
-  };
-
   return (
-    <motion.div 
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      className="p-4 md:p-6 max-w-7xl mx-auto space-y-6 md:space-y-8"
-    >
+    <div className="p-6 max-w-7xl mx-auto space-y-8 animate-fade-in">
 
       {/* Branding Hero Section */}
       <div className="relative overflow-hidden rounded-3xl bg-slate-900 text-white p-6 md:p-10 shadow-2xl">
@@ -133,7 +117,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, stats, onNavigate, lastActi
       <StreakWarning lastActivityAt={lastActivityAt ?? null} streak={stats?.streak ?? 0} />
 
       {/* Quick Actions Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         {[
           { label: 'Ask AI Brain', icon: BrainCircuit, color: 'bg-indigo-600', view: AppView.CONCEPT_COACH },
           { label: 'Instant Quiz', icon: Zap, color: 'bg-amber-500', view: AppView.EXAM_ARENA },
@@ -141,17 +125,16 @@ const Dashboard: React.FC<DashboardProps> = ({ user, stats, onNavigate, lastActi
           { label: 'Scan Doubt', icon: Camera, color: 'bg-emerald-500', view: AppView.DOUBT_SOLVER },
           { label: 'Learning Path', icon: Award, color: 'bg-green-500', view: AppView.LEARNING_PATH },
         ].map((action, i) => (
-          <motion.button
+          <button
             key={i}
-            variants={itemVariants}
             onClick={() => onNavigate(action.view)}
-            className="flex flex-col items-center justify-center p-4 md:p-6 bg-white/50 dark:bg-slate-800/50 backdrop-blur-xl rounded-3xl border border-white/20 dark:border-slate-700 shadow-sm hover:shadow-lg transition-all hover:-translate-y-1 group active:scale-95"
+            className="flex flex-col items-center justify-center p-6 bg-white/50 dark:bg-slate-800/50 backdrop-blur-xl rounded-3xl border border-white/20 dark:border-slate-700 shadow-sm hover:shadow-lg transition-all hover:-translate-y-1 group"
           >
-            <div className={`${action.color} p-3 md:p-4 rounded-2xl text-white mb-2 md:mb-3 shadow-lg group-hover:scale-110 transition-transform`}>
-              <action.icon size={20} className="md:w-6 md:h-6" />
+            <div className={`${action.color} p-4 rounded-2xl text-white mb-3 shadow-lg group-hover:scale-110 transition-transform`}>
+              <action.icon size={24} />
             </div>
-            <span className="font-bold text-xs md:text-sm text-slate-700 dark:text-slate-200 text-center leading-tight">{action.label}</span>
-          </motion.button>
+            <span className="font-semibold text-slate-700 dark:text-slate-200">{action.label}</span>
+          </button>
         ))}
       </div>
 
