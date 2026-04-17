@@ -115,7 +115,7 @@ const App: React.FC = () => {
 
   return (
     <div className={isDarkMode ? "dark" : ""}>
-      <div className="flex bg-slate-50 dark:bg-slate-950 font-sans min-h-screen text-slate-900 dark:text-slate-100 transition-colors duration-500 relative overflow-hidden">
+      <div className="flex bg-slate-50 dark:bg-transparent font-sans min-h-screen text-slate-900 dark:text-slate-100 transition-colors duration-500 relative overflow-hidden">
         <SpaceBackground isDarkMode={isDarkMode} />
         <Sidebar
           currentView={currentView}

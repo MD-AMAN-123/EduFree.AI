@@ -35,10 +35,10 @@ const IndiaMap = () => {
   ];
 
   return (
-    <div className="absolute inset-0 flex items-center justify-center opacity-60 pointer-events-none">
+    <div className="absolute inset-0 flex items-center justify-center opacity-100 pointer-events-none">
       <svg
         viewBox="0 0 400 1000"
-        className="h-[85vh] w-auto text-indigo-500/80 fill-current overflow-visible animate-neon"
+        className="h-[85vh] w-auto text-indigo-500/95 fill-current overflow-visible animate-neon"
       >
         <motion.path
           d={indiaPath}
@@ -46,7 +46,7 @@ const IndiaMap = () => {
           animate={{ pathLength: 1, opacity: 1 }}
           transition={{ duration: 4, ease: "easeInOut" }}
           stroke="currentColor"
-          strokeWidth="1.5"
+          strokeWidth="2.5"
           fill="none"
         />
         
@@ -95,10 +95,17 @@ const IndiaMap = () => {
 
 export const SpaceBackground: React.FC<{ isDarkMode: boolean }> = ({ isDarkMode }) => {
   return (
-    <div className={`fixed inset-0 z-[-1] transition-all duration-1000 overflow-hidden pointer-events-none ${isDarkMode ? 'bg-slate-950 opacity-100' : 'bg-slate-100 opacity-100'}`}>
+    <div className={`fixed inset-0 z-[-1] transition-all duration-1000 overflow-hidden pointer-events-none ${isDarkMode ? 'bg-slate-950' : 'bg-slate-50'}`}>
       
+      {/* Insane Animated Background Blobs (AuthPage Parity) */}
+      <div className={`absolute inset-0 transition-opacity duration-1000 ${isDarkMode ? 'opacity-100' : 'opacity-0'}`}>
+        <div className="absolute top-[-25%] left-[-15%] w-[80%] h-[80%] rounded-full bg-indigo-600/20 blur-[150px] animate-[pulse_8s_infinite]"></div>
+        <div className="absolute bottom-[-25%] right-[-15%] w-[80%] h-[80%] rounded-full bg-purple-600/20 blur-[150px] animate-[pulse_8s_infinite]" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-[30%] left-[10%] w-[40%] h-[40%] rounded-full bg-blue-500/10 blur-[120px] animate-pulse" style={{ animationDuration: '10s' }}></div>
+      </div>
+
       {/* 3D Animated Stars Layer */}
-      <div className={`absolute inset-0 transition-opacity duration-1000 ${isDarkMode ? 'opacity-40' : 'opacity-0'}`}>
+      <div className={`absolute inset-0 transition-opacity duration-1000 ${isDarkMode ? 'opacity-30' : 'opacity-0'}`}>
         <Canvas camera={{ position: [0, 0, 1] }}>
           <MovingStars />
         </Canvas>
@@ -111,8 +118,8 @@ export const SpaceBackground: React.FC<{ isDarkMode: boolean }> = ({ isDarkMode 
 
       {/* Modern Gradient Overlays */}
       <div className={`absolute inset-0 transition-all duration-1000 ${isDarkMode 
-        ? 'bg-gradient-to-br from-indigo-950/20 via-transparent to-purple-950/20' 
-        : 'bg-gradient-to-br from-indigo-50/50 via-transparent to-purple-50/50'}`} 
+        ? 'bg-gradient-to-br from-indigo-950/40 via-transparent to-purple-950/40' 
+        : 'bg-gradient-to-br from-white/20 via-transparent to-white/20'}`} 
       />
     </div>
   );

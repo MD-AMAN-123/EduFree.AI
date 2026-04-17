@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
   --color-primary: #4f46e5;
@@ -44,7 +45,13 @@
 
 .dark main, .dark #root, .dark .bg-white, .dark .bg-slate-800, .dark .bg-slate-900 {
   background-color: rgba(15, 23, 42, 0.4) !important;
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(40px) saturate(180%);
+  border-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.dark .glass {
+  background-color: rgba(15, 23, 42, 0.6) !important;
+  backdrop-filter: blur(50px);
 }
 
 /* Premium Utility Classes */
