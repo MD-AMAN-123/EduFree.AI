@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { Mail, Lock, User as UserIcon, ArrowRight, Loader2, BrainCircuit, Sparkles, ShieldCheck, Zap, Star, Globe, GraduationCap } from 'lucide-react';
+import { Mail, Lock, User as UserIcon, ArrowRight, Loader2, BrainCircuit, Sparkles, ShieldCheck, Zap, Star, Globe, GraduationCap, Sun, Moon } from 'lucide-react';
 import { User } from '../types';
 import { supabase } from '../services/supabaseClient';
 
 interface AuthPageProps {
   onLogin: (user: User) => void;
+  isDarkMode: boolean;
+  toggleDarkMode: () => void;
 }
 
-const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
+const AuthPage: React.FC<AuthPageProps> = ({ onLogin, isDarkMode, toggleDarkMode }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -84,8 +86,19 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 relative overflow-hidden font-sans selection:bg-indigo-500/30">
-      {/* Insane Animated Background Blobs */}
+    <div className="min-h-screen bg-transparent flex items-center justify-center p-4 relative overflow-hidden font-sans selection:bg-indigo-500/30">
+      {/* Top Right Actions */}
+      <div className="absolute top-6 right-6 z-50 flex items-center gap-4">
+        <button 
+          onClick={toggleDarkMode}
+          className="p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 text-white hover:bg-white/20 transition-all shadow-xl"
+          title="Toggle Theme"
+        >
+          {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+        </button>
+      </div>
+
+      {/* Subtle Blobs (Blending with Map) */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-25%] left-[-15%] w-[80%] h-[80%] rounded-full bg-indigo-600/20 blur-[150px] animate-[pulse_8s_infinite]"></div>
         <div className="absolute bottom-[-25%] right-[-15%] w-[80%] h-[80%] rounded-full bg-purple-600/20 blur-[150px] animate-[pulse_8s_infinite]" style={{ animationDelay: '2s' }}></div>

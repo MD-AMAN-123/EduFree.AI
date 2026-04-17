@@ -35,7 +35,7 @@ const IndiaMap = () => {
   ];
 
   return (
-    <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none">
+    <div className="absolute inset-0 flex items-center justify-center opacity-40 pointer-events-none">
       <svg
         viewBox="0 0 400 1000"
         className="h-[80vh] w-auto text-indigo-500 fill-current overflow-visible"
