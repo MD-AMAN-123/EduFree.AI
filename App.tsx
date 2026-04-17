@@ -19,6 +19,7 @@ import { SpaceBackground } from "./components/SpaceBackground";
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<AppView>(AppView.DASHBOARD);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [stats, setStats] = useState<DashboardStats>({
     topicsMastered: 12,
@@ -53,7 +54,7 @@ const App: React.FC = () => {
   useEffect(() => {
     const fetchInsights = async () => {
       try {
-        const insights = await generateDashboardInsights(stats);
+        const insights = await generateDashboardInsights(user?.name || "Student", stats);
         if (insights && insights.length > 0) {
           setStats((prev) => ({ ...prev, aiInsights: insights }));
         }
@@ -66,6 +67,14 @@ const App: React.FC = () => {
       fetchInsights();
     }
   }, [user]);
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
 
   const handleLogin = (newUser: User) => {
     setUser(newUser);
@@ -105,62 +114,63 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="dark">
-    <div className="flex bg-transparent dark:bg-transparent font-sans min-h-screen text-slate-900 dark:text-slate-100 transition-colors duration-300 relative overflow-hidden">
-      <SpaceBackground />
-      <Sidebar 
-        currentView={currentView} 
-        onChangeView={setCurrentView}
-        isMobileMenuOpen={isMobileMenuOpen}
-        setIsMobileMenuOpen={setIsMobileMenuOpen}
-        user={user}
-        onLogout={handleLogout}
-        onUpdateUser={setUser}
-      />
-      
-      <main className="flex-1 overflow-y-auto relative h-screen">
-        <div className="p-4 md:p-8 max-w-7xl mx-auto pb-32 md:pb-8">
-          <OfflineBanner />
-          {renderView()}
-        </div>
-        
-        {/* Floating Background Decorations (Parity with Educlarity) */}
-        <div className="fixed top-0 right-0 -z-10 w-[500px] h-[500px] opacity-10 pointer-events-none">
-          <div className="absolute top-0 right-0 w-full h-full bg-indigo-500 rounded-full blur-[120px] -mr-64 -mt-64"></div>
-        </div>
-      </main>
+    <div className={isDarkMode ? "dark" : ""}>
+      <div className="flex bg-slate-50 dark:bg-transparent font-sans min-h-screen text-slate-900 dark:text-slate-100 transition-colors duration-300 relative overflow-hidden">
+        <SpaceBackground isDarkMode={isDarkMode} />
+        <Sidebar
+          currentView={currentView}
+          onChangeView={setCurrentView}
+          isMobileMenuOpen={isMobileMenuOpen}
+          setIsMobileMenuOpen={setIsMobileMenuOpen}
+          user={user}
+          onLogout={handleLogout}
+          onUpdateUser={setUser}
+          isDarkMode={isDarkMode}
+          toggleDarkMode={() => setIsDarkMode(!isDarkMode)}
+        />
 
-      {/* Premium Mobile Bottom Navigation (Fixing Syntax Error) */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t dark:border-slate-800 z-50 px-6 flex items-center justify-between pb-4 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
-        {[
-          { id: AppView.DASHBOARD, icon: Layout, label: 'Home' },
-          { id: AppView.CONCEPT_COACH, icon: MessageCircle, label: 'Coach' },
-          { id: AppView.DOUBT_SOLVER, icon: Camera, label: 'Solver' },
-          { id: AppView.EXAM_ARENA, icon: PenTool, label: 'Exams' },
-          { id: 'more', icon: Menu, label: 'More' },
-        ].map((item) => {
-          const Icon = item.icon;
-          const isActive = currentView === item.id;
-          const isMore = item.id === 'more';
-          
-          return (
-            <button
-              key={item.id}
-              onClick={() => isMore ? setIsMobileMenuOpen(true) : setCurrentView(item.id as AppView)}
-              className={`flex flex-col items-center gap-1 transition-all duration-300 ${
-                isActive ? 'text-indigo-600 dark:text-indigo-400 scale-110' : 'text-slate-400 dark:text-slate-500'
-              }`}
-            >
-              <div className={`p-2 rounded-xl transition-colors ${isActive ? 'bg-indigo-50 dark:bg-indigo-900/20' : ''}`}>
-                <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
-              </div>
-              <span className="text-[10px] font-bold uppercase tracking-tighter">{item.label}</span>
-              {isActive && <div className="w-1 h-1 bg-indigo-600 dark:bg-indigo-400 rounded-full"></div>}
-            </button>
-          );
-        })}
-      </nav>
-    </div>
+        <main className="flex-1 overflow-y-auto relative h-screen">
+          <div className="p-4 md:p-8 max-w-7xl mx-auto pb-32 md:pb-8">
+            <OfflineBanner />
+            {renderView()}
+          </div>
+
+          {/* Floating Background Decorations (Parity with Educlarity) */}
+          <div className="fixed top-0 right-0 -z-10 w-[500px] h-[500px] opacity-10 pointer-events-none">
+            <div className="absolute top-0 right-0 w-full h-full bg-indigo-500 rounded-full blur-[120px] -mr-64 -mt-64"></div>
+          </div>
+        </main>
+
+        {/* Premium Mobile Bottom Navigation (Fixing Syntax Error) */}
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 h-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t dark:border-slate-800 z-50 px-6 flex items-center justify-between pb-4 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
+          {[
+            { id: AppView.DASHBOARD, icon: Layout, label: 'Home' },
+            { id: AppView.CONCEPT_COACH, icon: MessageCircle, label: 'Coach' },
+            { id: AppView.DOUBT_SOLVER, icon: Camera, label: 'Solver' },
+            { id: AppView.EXAM_ARENA, icon: PenTool, label: 'Exams' },
+            { id: 'more', icon: Menu, label: 'More' },
+          ].map((item) => {
+            const Icon = item.icon;
+            const isActive = currentView === item.id;
+            const isMore = item.id === 'more';
+
+            return (
+              <button
+                key={item.id}
+                onClick={() => isMore ? setIsMobileMenuOpen(true) : setCurrentView(item.id as AppView)}
+                className={`flex flex-col items-center gap-1 transition-all duration-300 ${isActive ? 'text-indigo-600 dark:text-indigo-400 scale-110' : 'text-slate-400 dark:text-slate-500'
+                  }`}
+              >
+                <div className={`p-2 rounded-xl transition-colors ${isActive ? 'bg-indigo-50 dark:bg-indigo-900/20' : ''}`}>
+                  <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
+                </div>
+                <span className="text-[10px] font-bold uppercase tracking-tighter">{item.label}</span>
+                {isActive && <div className="w-1 h-1 bg-indigo-600 dark:bg-indigo-400 rounded-full"></div>}
+              </button>
+            );
+          })}
+        </nav>
+      </div>
     </div>
   );
 };

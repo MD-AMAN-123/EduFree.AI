@@ -11,21 +11,14 @@ interface SidebarProps {
   user: User;
   onLogout: () => void;
   onUpdateUser: (user: User) => void;
+  isDarkMode: boolean;
+  toggleDarkMode: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, isMobileMenuOpen, setIsMobileMenuOpen, user, onLogout, onUpdateUser }) => {
+const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, isMobileMenuOpen, setIsMobileMenuOpen, user, onLogout, onUpdateUser, isDarkMode, toggleDarkMode }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [newName, setNewName] = useState(user.name);
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [uiLanguage, setUiLanguage] = useState<Language>(loadLanguage());
-
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [isDarkMode]);
 
   const t = (key: Parameters<typeof getLabel>[0]) => getLabel(key, uiLanguage);
 
@@ -66,7 +59,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, isMobileMe
         </div>
         <div className="flex items-center gap-3">
           <button 
-            onClick={() => setIsDarkMode(!isDarkMode)}
+            onClick={toggleDarkMode}
             className="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
           >
             {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
@@ -159,7 +152,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, isMobileMe
                 {uiLanguage === Language.ENGLISH ? 'EN' : 'HI'}
               </button>
                <button 
-                onClick={() => setIsDarkMode(!isDarkMode)}
+                onClick={toggleDarkMode}
                 className="flex items-center justify-center gap-2 p-3 bg-slate-100 dark:bg-slate-800 rounded-2xl text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
                 title="Toggle Theme"
               >
