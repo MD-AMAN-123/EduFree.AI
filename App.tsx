@@ -27,6 +27,9 @@ import {
   X,
   Sun,
   Moon,
+  Trophy,
+  Activity,
+  GraduationCap,
   BrainCircuit,
   Camera,
   PenTool
@@ -134,17 +137,20 @@ const App: React.FC = () => {
     <div className={isDarkMode ? "dark" : ""}>
       <div className="flex bg-slate-50 dark:bg-transparent font-sans min-h-screen text-slate-900 dark:text-slate-100 transition-colors duration-500 relative overflow-hidden">
         <SpaceBackground isDarkMode={isDarkMode} />
-        <Sidebar
-          currentView={currentView}
-          onChangeView={setCurrentView}
-          isMobileMenuOpen={isMobileMenuOpen}
-          setIsMobileMenuOpen={setIsMobileMenuOpen}
-          user={user}
-          onLogout={handleLogout}
-          onUpdateUser={setUser}
-          isDarkMode={isDarkMode}
-          toggleDarkMode={() => setIsDarkMode(!isDarkMode)}
-        />
+        {/* Sidebar - Desktop Only */}
+        <div className="hidden md:flex">
+          <Sidebar
+            currentView={currentView}
+            onChangeView={setCurrentView}
+            isMobileMenuOpen={isMobileMenuOpen}
+            setIsMobileMenuOpen={setIsMobileMenuOpen}
+            user={user}
+            onLogout={handleLogout}
+            onUpdateUser={setUser}
+            isDarkMode={isDarkMode}
+            toggleDarkMode={() => setIsDarkMode(!isDarkMode)}
+          />
+        </div>
 
         {/* Mobile Header */}
         <div className="md:hidden flex items-center justify-between p-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b dark:border-slate-800 sticky top-0 z-30 w-full">
@@ -170,11 +176,50 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        <main className="flex-1 overflow-y-auto overflow-x-hidden relative h-screen w-full">
-          <div className="p-4 md:p-8 max-w-full mx-auto pb-32 md:pb-8">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden relative h-screen w-full min-w-0">
+          <div className="p-4 md:p-8 w-full max-w-full mx-auto pb-32 md:pb-8">
             <OfflineBanner />
             {renderView()}
           </div>
+
+          {/* Mobile Dropdown Menu (Replacing Drawers) */}
+          {isMobileMenuOpen && (
+            <div className="md:hidden fixed inset-0 z-[60] animate-fade-in">
+              <div className="absolute inset-0 bg-slate-950/90 backdrop-blur-xl flex flex-col p-8 space-y-6">
+                <div className="flex items-center justify-between">
+                  <span className="text-2xl font-black text-white">Menu</span>
+                  <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 bg-white/10 rounded-full text-white">
+                    <X size={24} />
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 gap-4 overflow-y-auto pb-10">
+                  {[
+                    { id: AppView.LEARNING_PATH, label: 'Learning Path', icon: Layout },
+                    { id: AppView.SMART_ANALYTICS, label: 'Analytics', icon: Activity },
+                    { id: AppView.LEADERBOARD, label: 'Leaderboard', icon: Trophy },
+                    { id: AppView.CREATOR_STUDIO, label: 'Creator Studio', icon: BookOpen },
+                    { id: AppView.TEACHER_DASHBOARD, label: 'Teacher Portal', icon: GraduationCap },
+                  ].map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => { setCurrentView(item.id); setIsMobileMenuOpen(false); }}
+                      className="flex items-center gap-4 p-5 bg-white/5 rounded-3xl text-white font-bold hover:bg-white/10 transition-all border border-white/5"
+                    >
+                      <item.icon size={20} className="text-indigo-400" />
+                      {item.label}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }}
+                    className="flex items-center gap-4 p-5 bg-red-500/10 rounded-3xl text-red-400 font-bold border border-red-500/10"
+                  >
+                    <LogOut size={20} />
+                    Logout
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Floating Background Decorations (Parity with Educlarity) */}
           <div className="fixed top-0 right-0 -z-10 w-[500px] h-[500px] opacity-10 pointer-events-none">
