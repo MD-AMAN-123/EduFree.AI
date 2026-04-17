@@ -25,7 +25,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, stats, onNavigate, lastActi
     <div className="p-6 max-w-7xl mx-auto space-y-8 animate-fade-in">
 
       {/* Branding Hero Section */}
-      <div className="relative overflow-hidden rounded-3xl bg-slate-900 text-white p-6 md:p-10 shadow-2xl">
+      <div className="relative overflow-hidden rounded-3xl bg-slate-900 text-white p-6 md:p-10 shadow-2xl max-w-full">
         {/* Background Gradients */}
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 via-purple-700 to-indigo-900 opacity-95"></div>
         <div className="absolute -top-32 -left-32 w-96 h-96 bg-purple-500 rounded-full mix-blend-screen filter blur-3xl opacity-20"></div>
@@ -48,7 +48,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, stats, onNavigate, lastActi
             </div>
 
             <div>
-              <h2 className="text-2xl md:text-4xl font-bold leading-tight mb-3">
+              <h2 className="text-xl sm:text-2xl md:text-4xl font-bold leading-tight mb-3">
                 Unlock your full <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-200 to-indigo-200">
                   Academic Potential

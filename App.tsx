@@ -24,6 +24,9 @@ import {
   Globe,
   Search,
   Menu,
+  X,
+  Sun,
+  Moon,
   BrainCircuit,
   Camera,
   PenTool
@@ -144,23 +147,31 @@ const App: React.FC = () => {
         />
 
         {/* Mobile Header */}
-        <div className="md:hidden flex items-center justify-between p-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b dark:border-slate-800 sticky top-0 z-30">
+        <div className="md:hidden flex items-center justify-between p-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b dark:border-slate-800 sticky top-0 z-30 w-full">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
               <BrainCircuit className="text-white w-5 h-5" />
             </div>
             <span className="font-bold dark:text-white">EduFree.AI</span>
           </div>
-          <button
-            onClick={() => setIsMobileMenuOpen(true)}
-            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
-          >
-            <Menu className="text-slate-600 dark:text-slate-400" size={24} />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              className="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
+            >
+              {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+            >
+              {isMobileMenuOpen ? <X size={24} className="text-slate-600 dark:text-slate-400" /> : <Menu className="text-slate-600 dark:text-slate-400" size={24} />}
+            </button>
+          </div>
         </div>
 
-        <main className="flex-1 overflow-y-auto relative h-screen">
-          <div className="p-4 md:p-8 max-w-7xl mx-auto pb-32 md:pb-8">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden relative h-screen w-full">
+          <div className="p-4 md:p-8 max-w-full mx-auto pb-32 md:pb-8">
             <OfflineBanner />
             {renderView()}
           </div>
