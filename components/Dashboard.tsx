@@ -1,15 +1,20 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
-import { CheckCircle, Clock, Award, AlertTriangle, Globe, Sparkles, BrainCircuit, Zap, Camera, Flame, Trophy, Target } from 'lucide-react';
+import { CheckCircle, Clock, Award, Globe, Sparkles, BrainCircuit, Zap, Camera } from 'lucide-react';
 import { User, AppView, DashboardStats } from '../types';
+import LivePulse from './LivePulse';
+import StreakWarning from './StreakWarning';
+import LeaderboardWidget from './LeaderboardWidget';
+import AIInsightsStream from './AIInsightsStream';
 
 interface DashboardProps {
   user: User;
   stats: DashboardStats;
   onNavigate: (view: AppView, topic?: string) => void;
+  lastActivityAt?: string | null;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ user, stats, onNavigate }) => {
+const Dashboard: React.FC<DashboardProps> = ({ user, stats, onNavigate, lastActivityAt }) => {
   const firstName = user.name.split(' ')[0];
 
   // Defensive check for stats to prevent runtime crashes
@@ -90,6 +95,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, stats, onNavigate }) => {
           <p className="text-slate-500 dark:text-slate-400 mt-1">You're on a roll! Keep up the great work.</p>
         </div>
         <div className="flex gap-4">
+          <LivePulse />
           <div className="bg-orange-50 dark:bg-orange-900/20 px-4 py-2 rounded-2xl flex items-center gap-2 border border-orange-100 dark:border-orange-500/20 shadow-sm">
             <span className="text-2xl">🔥</span>
             <div>
@@ -106,6 +112,9 @@ const Dashboard: React.FC<DashboardProps> = ({ user, stats, onNavigate }) => {
           </div>
         </div>
       </div>
+
+      {/* Streak Warning */}
+      <StreakWarning lastActivityAt={lastActivityAt ?? null} streak={stats?.streak ?? 0} />
 
       {/* Quick Actions Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -176,6 +185,8 @@ const Dashboard: React.FC<DashboardProps> = ({ user, stats, onNavigate }) => {
               ))}
             </div>
           </div>
+
+          <LeaderboardWidget currentUserId={user.id} limit={5} />
         </div>
                {/* Right Column: Analytics */}
         <div className="lg:col-span-2 space-y-6">
@@ -245,37 +256,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, stats, onNavigate }) => {
       </div>
 
       {/* AI Insights Section */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-indigo-500" />
-          <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">AI Personal Insights</h3>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {stats?.aiInsights ? (
-            stats.aiInsights.map((insight, idx) => (
-              <div
-                key={idx}
-                className={`p-4 rounded-xl border flex flex-col gap-2 transition-all hover:shadow-md animate-in fade-in slide-in-from-bottom-2 duration-500`}
-                style={{ animationDelay: `${idx * 150}ms` }}
-              >
-                <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${insight.type === 'success' ? 'bg-green-500' :
-                      insight.type === 'warning' ? 'bg-orange-500' : 'bg-blue-500'
-                    }`} />
-                  <span className="font-bold text-sm text-slate-900 dark:text-slate-100">{insight.title}</span>
-                </div>
-                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                  {insight.description}
-                </p>
-              </div>
-            ))
-          ) : (
-            <div className="col-span-full py-8 text-center bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-dashed dark:border-slate-700">
-              <p className="text-slate-400 text-sm">Generating fresh insights for you...</p>
-            </div>
-          )}
-        </div>
-      </div>
+      <AIInsightsStream userName={firstName} stats={stats} />
 
       {/* Recommended Actions */}
       <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden group">

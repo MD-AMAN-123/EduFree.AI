@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Camera, RefreshCw, CheckCircle2, AlertCircle, Image as ImageIcon, Sparkles, Brain, Loader2, StopCircle } from 'lucide-react';
+import { Camera, RefreshCw, CheckCircle2, AlertCircle, Image as ImageIcon, Sparkles, Brain, Loader2, StopCircle, History } from 'lucide-react';
 import { solveQuestionFromImage } from '../services/geminiService';
+import { supabase } from '../services/supabaseClient';
+import { enqueue } from '../services/syncQueue';
+import Tesseract from 'tesseract.js';
 
 const DoubtSolver: React.FC = () => {
   const [stream, setStream] = useState<MediaStream | null>(null);
@@ -9,6 +12,9 @@ const DoubtSolver: React.FC = () => {
   const [solution, setSolution] = useState<{ topic: string, answer: string, steps: string[] } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [liveLog, setLiveLog] = useState<string[]>([]);
+  const [lowQuality, setLowQuality] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [history, setHistory] = useState<any[]>([]);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -17,6 +23,16 @@ const DoubtSolver: React.FC = () => {
     startCamera();
     return () => stopCamera();
   }, []);
+
+  const loadHistory = async () => {
+    if (!supabase) return;
+    const { data } = await supabase
+      .from('doubt_history')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(10);
+    setHistory(data ?? []);
+  };
 
   const startCamera = async () => {
     setError(null);
@@ -49,46 +65,55 @@ const DoubtSolver: React.FC = () => {
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
-      
-      // Set canvas to video dimensions
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
-      
       const context = canvas.getContext('2d');
       if (context) {
-        // High quality capture settings
         context.imageSmoothingEnabled = true;
         context.imageSmoothingQuality = 'high';
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        
-        // Use JPEG with high quality to balance file size and detail for AI
         const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
         setCapturedImage(dataUrl);
-        
-        // Instant visual feedback
         setIsAnalyzing(true);
         setError(null);
-        
+        setLowQuality(false);
+
         try {
-          // Extract base64 part for API
           const base64 = dataUrl.split(',')[1];
-          
+
+          // OCR confidence check
+          setLiveLog(["Running OCR confidence check..."]);
+          const ocrResult = await Tesseract.recognize(dataUrl, 'eng');
+          const confidence = ocrResult.data.confidence;
+
+          if (confidence < 60) {
+            setLowQuality(true);
+            setIsAnalyzing(false);
+            return;
+          }
+
           setLiveLog(["Initializing vision model...", "Scanning image for text...", "Extracting mathematical symbols..."]);
           const logInterval = setInterval(() => {
-            const logs = [
-                "Analyzing concept structure...",
-                "Cross-referencing with knowledge base...",
-                "Validating formula derivation...",
-                "Synthesizing final solution..."
-            ];
+            const logs = ["Analyzing concept structure...", "Cross-referencing with knowledge base...", "Synthesizing final solution..."];
             setLiveLog(prev => [...prev, logs[Math.floor(Math.random() * logs.length)]]);
           }, 800);
 
           const result = await solveQuestionFromImage(base64);
           clearInterval(logInterval);
-
           setSolution(result);
           stopCamera();
+
+          // Save to doubt history
+          const record = {
+            question_text: ocrResult.data.text.trim().slice(0, 500),
+            topic: result.topic,
+            solution: result,
+          };
+          if (navigator.onLine && supabase) {
+            await supabase.from('doubt_history').insert(record);
+          } else {
+            enqueue({ type: 'insert', table: 'doubt_history', data: record });
+          }
         } catch (err: any) {
           console.error("Analysis Error:", err);
           setError("I couldn't process this image. Please ensure the question is clear and well-lit.");
@@ -119,12 +144,47 @@ const DoubtSolver: React.FC = () => {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => { setShowHistory(h => !h); loadHistory(); }}
+            className="flex items-center gap-2 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+          >
+            <History size={14} /> History
+          </button>
           <div className="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 px-4 py-1.5 rounded-full text-xs font-bold flex items-center gap-2 border border-indigo-200 dark:border-indigo-800">
             <Sparkles size={14} className="animate-pulse" />
             LIVE VISION ACTIVE
           </div>
         </div>
       </div>
+
+      {/* Low quality warning */}
+      {lowQuality && (
+        <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700/40 p-4 rounded-2xl flex items-center gap-3">
+          <AlertCircle className="text-orange-500 flex-shrink-0" size={20} />
+          <div>
+            <p className="font-bold text-orange-700 dark:text-orange-400 text-sm">Image quality too low (confidence &lt; 60%)</p>
+            <p className="text-xs text-orange-600 dark:text-orange-500 mt-0.5">Please retake the photo in better lighting with the text clearly visible.</p>
+          </div>
+          <button onClick={() => { setLowQuality(false); reset(); }} className="ml-auto text-xs font-bold text-orange-600 underline">Retake</button>
+        </div>
+      )}
+
+      {/* Doubt History Panel */}
+      {showHistory && (
+        <div className="bg-white dark:bg-slate-800 rounded-2xl border dark:border-slate-700 p-4 space-y-3">
+          <h3 className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2"><History size={16} /> Recent Doubts</h3>
+          {history.length === 0 ? (
+            <p className="text-slate-400 text-sm text-center py-4">No doubt history yet.</p>
+          ) : (
+            history.map((item, idx) => (
+              <div key={idx} className="p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl text-sm">
+                <p className="font-semibold text-slate-700 dark:text-slate-200 truncate">{item.topic}</p>
+                <p className="text-slate-500 dark:text-slate-400 text-xs mt-0.5 truncate">{item.question_text}</p>
+              </div>
+            ))
+          )}
+        </div>
+      )}
 
       {!capturedImage ? (
         <div className="relative aspect-video md:aspect-[16/9] bg-slate-950 rounded-3xl overflow-hidden shadow-2xl border-4 border-white dark:border-slate-800">

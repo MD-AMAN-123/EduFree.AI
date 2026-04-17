@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { BookOpen, BarChart2, MessageCircle, PenTool, Layout, Leaf, Menu, X, Map, GraduationCap, LogOut, Edit2, Check, Moon, Sun, Camera, Activity } from 'lucide-react';
-import { AppView, User } from '../types';
+import { BookOpen, BarChart2, MessageCircle, PenTool, Layout, Leaf, Menu, X, Map, GraduationCap, LogOut, Moon, Sun, Camera, Activity, Trophy } from 'lucide-react';
+import { AppView, User, Language } from '../types';
+import { getLabel, persistLanguage, loadLanguage } from '../services/i18nService';
 
 interface SidebarProps {
   currentView: AppView;
@@ -16,6 +17,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, isMobileMe
   const [isEditing, setIsEditing] = useState(false);
   const [newName, setNewName] = useState(user.name);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [uiLanguage, setUiLanguage] = useState<Language>(loadLanguage());
 
   useEffect(() => {
     if (isDarkMode) {
@@ -24,22 +26,32 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, isMobileMe
       document.documentElement.classList.remove('dark');
     }
   }, [isDarkMode]);
-  
+
+  const t = (key: Parameters<typeof getLabel>[0]) => getLabel(key, uiLanguage);
+
+  const handleLanguageToggle = () => {
+    const next = uiLanguage === Language.ENGLISH ? Language.HINDI : Language.ENGLISH;
+    setUiLanguage(next);
+    persistLanguage(next);
+  };
+
   const navItems = [
-    { id: AppView.DASHBOARD, label: 'Dashboard', icon: Layout },
-    { id: AppView.LEARNING_PATH, label: 'Learning Path', icon: Map },
-    { id: AppView.CONCEPT_COACH, label: 'AI Coach', icon: MessageCircle },
-    { id: AppView.DOUBT_SOLVER, label: 'Doubt Solver', icon: Camera },
-    { id: AppView.EXAM_ARENA, label: 'Exam Arena', icon: PenTool },
-    { id: AppView.SMART_ANALYTICS, label: 'Analytics', icon: Activity },
-    { id: AppView.CREATOR_STUDIO, label: 'Creator Studio', icon: BookOpen },
-    { id: AppView.TEACHER_DASHBOARD, label: 'Teacher Dash', icon: GraduationCap },
-    { id: AppView.ECO_TRACKER, label: 'Eco Impact', icon: Leaf },
+    { id: AppView.DASHBOARD,        label: t('dashboard'),        icon: Layout },
+    { id: AppView.LEARNING_PATH,    label: t('learningPath'),     icon: Map },
+    { id: AppView.CONCEPT_COACH,    label: t('conceptCoach'),     icon: MessageCircle },
+    { id: AppView.DOUBT_SOLVER,     label: t('doubtSolver'),      icon: Camera },
+    { id: AppView.EXAM_ARENA,       label: t('examArena'),        icon: PenTool },
+    { id: AppView.LEADERBOARD,      label: t('leaderboard'),      icon: Trophy },
+    { id: AppView.SMART_ANALYTICS,  label: t('smartAnalytics'),   icon: Activity },
+    { id: AppView.CREATOR_STUDIO,   label: t('creatorStudio'),    icon: BookOpen },
+    { id: AppView.TEACHER_DASHBOARD,label: t('teacherDashboard'), icon: GraduationCap },
+    { id: AppView.ECO_TRACKER,      label: 'Eco Impact',          icon: Leaf },
   ];
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (newName.trim()) {
-      onUpdateUser({ ...user, name: newName });
+      const updated = await (await import('../services/authService')).updateProfile(user.id, { name: newName.trim() });
+      onUpdateUser(updated ?? { ...user, name: newName.trim() });
     }
     setIsEditing(false);
   };
@@ -88,6 +100,8 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, isMobileMe
                     onChangeView(item.id);
                     setIsMobileMenuOpen(false);
                   }}
+                  aria-label={item.label}
+                  aria-current={isActive ? 'page' : undefined}
                   className={`
                     w-full flex items-center gap-3 px-4 py-3 text-sm font-bold rounded-2xl transition-all duration-200
                     ${isActive 
@@ -135,7 +149,14 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, isMobileMe
             </div>
 
             {/* Bottom Actions */}
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                onClick={handleLanguageToggle}
+                className="flex items-center justify-center gap-1 p-3 bg-slate-100 dark:bg-slate-800 rounded-2xl text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-xs font-bold"
+                title="Toggle Language"
+              >
+                {uiLanguage === Language.ENGLISH ? 'EN' : 'HI'}
+              </button>
                <button 
                 onClick={() => setIsDarkMode(!isDarkMode)}
                 className="flex items-center justify-center gap-2 p-3 bg-slate-100 dark:bg-slate-800 rounded-2xl text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"

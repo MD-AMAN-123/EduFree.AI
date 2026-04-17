@@ -2,6 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Send, Mic, Play, Square, Loader2, Volume2, Globe, Image as ImageIcon } from 'lucide-react';
 import { CoachMode, ChatMessage, Language } from '../types';
 import { generateCoachResponse, generateCoachResponseStream, blobToBase64, generateVisualAid } from '../services/geminiService';
+import { getTextDirection } from '../services/i18nService';
+
+const CACHE_KEY_MESSAGES = 'edufree_coach_messages';
 
 interface ConceptCoachProps {
   initialTopic?: string;
@@ -9,14 +12,24 @@ interface ConceptCoachProps {
 }
 
 const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic }) => {
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
+  // Load cached messages on mount
+  const loadCachedMessages = (): ChatMessage[] => {
+    try {
+      const cached = localStorage.getItem(CACHE_KEY_MESSAGES);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        return parsed.slice(-20); // Keep last 20
+      }
+    } catch {}
+    return [{
       id: 'welcome',
       role: 'model',
       text: 'Hello! I am EduFree. I am here to tutor you even without internet. What should we learn today?',
       timestamp: Date.now()
-    }
-  ]);
+    }];
+  };
+
+  const [messages, setMessages] = useState<ChatMessage[]>(loadCachedMessages());
   const [inputText, setInputText] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -32,6 +45,13 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isGeneratingImage]);
+
+  // Persist last 20 messages to localStorage
+  useEffect(() => {
+    if (messages.length > 1) {
+      localStorage.setItem(CACHE_KEY_MESSAGES, JSON.stringify(messages.slice(-20)));
+    }
+  }, [messages]);
 
   // Auto-start revision if a topic is passed
   useEffect(() => {
@@ -323,14 +343,14 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
       </div>
 
       {/* Chat Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4" role="log" aria-label="Chat messages" aria-live="polite">
         {messages.map((msg) => (
           <div key={msg.id} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'} animate-slide-in`}>
             <div className={`max-w-[85%] md:max-w-[70%] rounded-[1.5rem] p-5 shadow-lg border-2 ${msg.role === 'user'
               ? 'bg-indigo-600 text-white border-indigo-500 rounded-tr-none'
               : 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 border-white dark:border-slate-800 rounded-tl-none'
               }`}>
-              {msg.text && <p className="leading-relaxed whitespace-pre-wrap font-medium" dir="auto">{msg.text}</p>}
+              {msg.text && <p className="leading-relaxed whitespace-pre-wrap font-medium" dir={getTextDirection(language)}>{msg.text}</p>}
 
               {msg.imageData && (
                 <div className="mt-4 rounded-2xl overflow-hidden border-2 border-indigo-100 dark:border-indigo-900/30">

@@ -8,6 +8,8 @@ import LearningPath from "./components/LearningPath";
 import TeacherDashboard from "./components/TeacherDashboard";
 import CreatorStudio from "./components/CreatorStudio";
 import AuthPage from "./components/AuthPage";
+import Leaderboard from "./components/Leaderboard";
+import OfflineBanner from "./components/OfflineBanner";
 import { AppView, User, DashboardStats } from "./types";
 import { generateDashboardInsights } from "./services/geminiService";
 import { Layout, MessageCircle, Camera, PenTool, Menu } from "lucide-react";
@@ -82,11 +84,13 @@ const App: React.FC = () => {
       case AppView.SMART_ANALYTICS:
         return <SmartAnalytics stats={stats} />;
       case AppView.LEARNING_PATH:
-        return <LearningPath />;
+        return <LearningPath onNavigate={setCurrentView} studentId={user?.id} />;
       case AppView.TEACHER_DASHBOARD:
-        return <TeacherDashboard />;
+        return <TeacherDashboard user={user} />;
       case AppView.CREATOR_STUDIO:
         return <CreatorStudio />;
+      case AppView.LEADERBOARD:
+        return <Leaderboard currentUserId={user?.id} />;
       default:
         return <Dashboard user={user!} stats={stats} onNavigate={setCurrentView} />;
     }
@@ -110,6 +114,7 @@ const App: React.FC = () => {
       
       <main className="flex-1 overflow-y-auto relative h-screen">
         <div className="p-4 md:p-8 max-w-7xl mx-auto pb-32 md:pb-8">
+          <OfflineBanner />
           {renderView()}
         </div>
         

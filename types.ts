@@ -10,6 +10,7 @@ export enum AppView {
   CUSTOMER_SUPPORT = 'CUSTOMER_SUPPORT',
   DOUBT_SOLVER = 'DOUBT_SOLVER',
   SMART_ANALYTICS = 'SMART_ANALYTICS',
+  LEADERBOARD = 'LEADERBOARD',
 }
 
 export enum CoachMode {
@@ -120,4 +121,109 @@ export interface DashboardStats {
   weeklyActivity: WeeklyMetric[];
   syllabusProgress: SyllabusMetric[];
   aiInsights?: AIInsight[];
+}
+
+// --- Advanced Feature Types ---
+
+export type DifficultyLevel = 'Beginner' | 'Intermediate' | 'Advanced';
+
+export type ActivityType =
+  | 'quiz_complete'
+  | 'concept_session'
+  | 'doubt_solved'
+  | 'streak_bonus'
+  | 'node_complete';
+
+export interface LeaderboardEntry {
+  id: string;
+  name: string;
+  avatar?: string;
+  xp: number;
+  streak: number;
+  rank: number;
+}
+
+export interface RankInfo {
+  rank: number;
+  xpToNext: number;
+  percentile: number;
+}
+
+export interface QuizSession {
+  id: string;
+  topic: string;
+  difficulty: DifficultyLevel;
+  questions: QuizQuestion[];
+  answers: (number | null)[];
+  startTime: number;
+  consecutiveCorrect: number;
+  consecutiveIncorrect: number;
+}
+
+export interface QuizResult {
+  score: number;
+  totalQuestions: number;
+  timeTaken: number;
+  xpEarned: number;
+  weakAreas: string[];
+  newDifficulty: DifficultyLevel;
+}
+
+export interface XPResult {
+  xpAwarded: number;
+  newTotal: number;
+  milestones: MilestoneResult[];
+}
+
+export interface MilestoneResult {
+  type: 'xp_milestone' | 'streak_badge';
+  title: string;
+  description: string;
+  xpBonus: number;
+}
+
+export interface SyncOperation {
+  id: string;
+  type: 'upsert' | 'insert';
+  table: string;
+  data: object;
+  timestamp: number;
+}
+
+export interface BroadcastMessage {
+  id: string;
+  teacherName: string;
+  message: string;
+  timestamp: number;
+}
+
+export interface ClassroomEvent {
+  type: 'student_joined' | 'student_left' | 'broadcast';
+  studentId?: string;
+  data?: object;
+}
+
+export interface DifficultyUpdate {
+  newDifficulty: DifficultyLevel;
+  consecutiveCorrect: number;
+  consecutiveIncorrect: number;
+  weakAreaFlagged?: string;
+}
+
+export interface StudentActivity {
+  studentId: string;
+  name: string;
+  avatar?: string;
+  currentTopic?: string;
+  status: 'At Risk' | 'Stable' | 'Excelling';
+  avgScore: number;
+  lastActive: string;
+  isOnline: boolean;
+}
+
+export interface ClassAnalytics {
+  avgScorePerTopic: { topic: string; avgScore: number }[];
+  mostCommonWeakAreas: string[];
+  engagementRate: number;
+  totalActiveStudents: number;
 }
