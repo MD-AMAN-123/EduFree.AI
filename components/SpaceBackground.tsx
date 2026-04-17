@@ -35,11 +35,10 @@ const IndiaMap = () => {
   ];
 
   return (
-    <div className="absolute inset-0 flex items-center justify-center opacity-40 pointer-events-none">
+    <div className="absolute inset-0 flex items-center justify-center opacity-60 pointer-events-none">
       <svg
         viewBox="0 0 400 1000"
-        className="h-[80vh] w-auto text-indigo-500 fill-current overflow-visible"
-        style={{ filter: 'drop-shadow(0 0 20px rgba(79, 70, 229, 0.4))' }}
+        className="h-[85vh] w-auto text-indigo-500/80 fill-current overflow-visible animate-neon"
       >
         <motion.path
           d={indiaPath}
@@ -47,10 +46,25 @@ const IndiaMap = () => {
           animate={{ pathLength: 1, opacity: 1 }}
           transition={{ duration: 4, ease: "easeInOut" }}
           stroke="currentColor"
-          strokeWidth="2"
+          strokeWidth="1.5"
           fill="none"
         />
         
+        {/* Animated Network Lines between Hubs */}
+        {hubs.map((hub, i) => i < hubs.length - 1 && (
+          <motion.line
+            key={`line-${i}`}
+            x1={hub.x} y1={hub.y}
+            x2={hubs[i+1].x} y2={hubs[i+1].y}
+            stroke="currentColor"
+            strokeWidth="0.5"
+            strokeDasharray="4 4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0, 0.3, 0] }}
+            transition={{ delay: 3 + i * 0.5, duration: 4, repeat: Infinity }}
+          />
+        ))}
+
         {hubs.map((hub, idx) => (
           <g key={idx}>
             <motion.circle
@@ -81,30 +95,25 @@ const IndiaMap = () => {
 
 export const SpaceBackground: React.FC<{ isDarkMode: boolean }> = ({ isDarkMode }) => {
   return (
-    <div className={`fixed inset-0 z-[-1] transition-colors duration-1000 overflow-hidden pointer-events-none ${isDarkMode ? 'bg-slate-950' : 'bg-slate-50'}`}>
+    <div className={`fixed inset-0 z-[-1] transition-all duration-1000 overflow-hidden pointer-events-none ${isDarkMode ? 'bg-slate-950 opacity-100' : 'bg-slate-100 opacity-100'}`}>
       
       {/* 3D Animated Stars Layer */}
-      <div className={`absolute inset-0 transition-opacity duration-1000 ${isDarkMode ? 'opacity-100' : 'opacity-0'}`}>
+      <div className={`absolute inset-0 transition-opacity duration-1000 ${isDarkMode ? 'opacity-40' : 'opacity-0'}`}>
         <Canvas camera={{ position: [0, 0, 1] }}>
           <MovingStars />
         </Canvas>
       </div>
 
       {/* India Map Animated Layer (Visible in Dark Mode) */}
-      <div className={`absolute inset-0 transition-opacity duration-1000 ${isDarkMode ? 'opacity-100' : 'opacity-0'}`}>
+      <div className={`absolute inset-0 transition-all duration-1000 transform ${isDarkMode ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
         <IndiaMap />
       </div>
 
-      {/* Decorative Gradients */}
-      <div className={`absolute inset-0 bg-gradient-to-b from-transparent transition-colors duration-1000 ${isDarkMode ? 'to-slate-950/80' : 'to-white/80'}`} />
-      
-      {/* Light Mode Specific Decorations */}
-      {!isDarkMode && (
-        <div className="absolute inset-0">
-          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-100 rounded-full blur-[100px] opacity-50" />
-          <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-100 rounded-full blur-[100px] opacity-50" />
-        </div>
-      )}
+      {/* Modern Gradient Overlays */}
+      <div className={`absolute inset-0 transition-all duration-1000 ${isDarkMode 
+        ? 'bg-gradient-to-br from-indigo-950/20 via-transparent to-purple-950/20' 
+        : 'bg-gradient-to-br from-indigo-50/50 via-transparent to-purple-50/50'}`} 
+      />
     </div>
   );
 };

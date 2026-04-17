@@ -16,7 +16,11 @@
 
 @layer base {
   body {
-    @apply bg-slate-50 text-slate-900 antialiased selection:bg-indigo-100 selection:text-indigo-900;
+    @apply bg-slate-50 text-slate-900 antialiased selection:bg-indigo-100 selection:text-indigo-900 transition-colors duration-500;
+  }
+  
+  html.dark body {
+    @apply bg-slate-950 text-slate-100;
   }
 }
 
@@ -34,8 +38,13 @@
   }
 
   .stat-card {
-    @apply bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm transition-all duration-300 hover:scale-[1.02] hover:shadow-lg active:scale-[0.98];
+    @apply bg-white dark:bg-slate-900/40 backdrop-blur-xl p-6 rounded-2xl border border-slate-100 dark:border-white/10 shadow-sm transition-all duration-300 hover:scale-[1.02] hover:shadow-lg active:scale-[0.98];
   }
+}
+
+.dark main, .dark #root, .dark .bg-white, .dark .bg-slate-800, .dark .bg-slate-900 {
+  background-color: rgba(15, 23, 42, 0.4) !important;
+  backdrop-filter: blur(12px);
 }
 
 /* Premium Utility Classes */
@@ -67,6 +76,15 @@
 /* Smooth Transitions */
 * {
   @apply transition-colors duration-200;
+}
+
+@keyframes neonGlow {
+  0%, 100% { filter: drop-shadow(0 0 15px rgba(79, 70, 229, 0.4)); }
+  50% { filter: drop-shadow(0 0 30px rgba(79, 70, 229, 0.8)); }
+}
+
+.animate-neon {
+  animation: neonGlow 3s ease-in-out infinite;
 }
 
 /* AI Message Bubble animations */
