@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BookOpen, BarChart2, MessageCircle, PenTool, Layout, Leaf, Menu, X, Map, GraduationCap, LogOut, Moon, Sun, Camera, Activity, Trophy, FileText, Flame } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { AppView, User, Language } from '../types';
 import { getLabel, persistLanguage, loadLanguage } from '../services/i18nService';
 
@@ -71,112 +72,79 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onChangeView, isMobileMe
       </div>
 
       {/* Sidebar Container */}
-      <div className={`
-        fixed inset-y-0 left-0 z-40 w-64 glass border-r dark:border-slate-800 transform transition-transform duration-300 ease-in-out
-        ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
-        md:translate-x-0 md:static md:h-screen flex flex-col
-      `}>
-        <div className="flex flex-col h-full bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl">
-          <div className="h-20 flex items-center px-6 border-b dark:border-slate-800 hidden md:flex shrink-0">
-             <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-              Edu<span className="text-indigo-600">Free</span><span className="text-indigo-400">.AI</span>
-             </span>
-          </div>
+      <AnimatePresence>
+        {(isMobileMenuOpen || !window.matchMedia('(max-width: 768px)').matches) && (
+          <motion.div 
+            initial={{ x: "-100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "-100%" }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="fixed md:sticky top-0 inset-y-0 left-0 z-40 w-64 glass border-r dark:border-slate-800 flex flex-col h-screen"
+          >
+            <div className="flex flex-col h-full bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl">
+              <div className="h-20 flex items-center px-6 border-b dark:border-slate-800 hidden md:flex shrink-0">
+                 <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+                  Edu<span className="text-indigo-600">Free</span><span className="text-indigo-400">.AI</span>
+                 </span>
+              </div>
 
-          <nav className="flex-1 p-4 space-y-2 overflow-y-auto mt-16 md:mt-4">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = currentView === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    onChangeView(item.id);
-                    setIsMobileMenuOpen(false);
-                  }}
-                  aria-label={item.label}
-                  aria-current={isActive ? 'page' : undefined}
-                  className={`
-                    w-full flex items-center gap-3 px-4 py-3 text-sm font-bold rounded-2xl transition-all duration-200
-                    ${isActive 
-                      ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200 dark:shadow-indigo-900/20 scale-[1.02]' 
-                      : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200'}
-                  `}
-                >
-                  <Icon size={18} strokeWidth={isActive ? 3 : 2} />
-                  {item.label}
-                </button>
-              );
-            })}
-            {/* Exam Streak Card (Parity with Educlarity) */}
-            <div className="mx-2 mt-6 p-4 premium-gradient rounded-3xl text-white shadow-lg overflow-hidden relative group">
-              <div className="absolute top-0 right-0 p-2 opacity-20 transform translate-x-2 -translate-y-2 group-hover:scale-110 transition-transform">
-                <Activity size={80} />
-              </div>
-              <p className="text-[10px] font-bold uppercase tracking-widest opacity-80 mb-1">Current Streak</p>
-              <div className="flex items-center gap-2 mb-3">
-                <Flame className="text-orange-400 fill-orange-400" size={24} />
-                <span className="text-2xl font-black italic">14 DAYS</span>
-              </div>
-              <div className="relative h-1.5 w-full bg-white/20 rounded-full overflow-hidden">
-                <div className="absolute inset-y-0 left-0 bg-white rounded-full transition-all duration-1000" style={{ width: '70%' }}></div>
-              </div>
-              <p className="text-[10px] mt-2 font-bold opacity-90">3 days to next reward! 🎁</p>
-            </div>
-          </nav>
-          
-          <div className="p-4 border-t dark:border-slate-800 space-y-4">
-            {/* User Profile */}
-            <div className="flex items-center gap-3 p-3 rounded-2xl bg-white/50 dark:bg-slate-800/50 border dark:border-slate-700 shadow-sm">
-              <div className="relative">
-                <img 
-                  src={user.avatar || `https://ui-avatars.com/api/?name=${user.name}&background=4f46e5&color=fff`} 
-                  alt={user.name}
-                  className="w-10 h-10 rounded-xl"
-                />
-                <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white dark:border-slate-800 rounded-full"></div>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold text-slate-900 dark:text-white truncate">{user.name}</p>
-                <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate tracking-tight">{user.email}</p>
+              <nav className="flex-1 p-4 space-y-2 overflow-y-auto mt-16 md:mt-4">
+                {navItems.map((item, idx) => {
+                  const Icon = item.icon;
+                  const isActive = currentView === item.id;
+                  return (
+                    <motion.button
+                      key={item.id}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.1 + idx * 0.03 }}
+                      onClick={() => {
+                        onChangeView(item.id);
+                        if (window.matchMedia('(max-width: 768px)').matches) setIsMobileMenuOpen(false);
+                      }}
+                      className={`
+                        w-full flex items-center gap-3 px-4 py-3 text-sm font-bold rounded-2xl transition-all duration-200
+                        ${isActive 
+                          ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200 dark:shadow-indigo-900/20 scale-[1.02]' 
+                          : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200'}
+                      `}
+                    >
+                      <Icon size={18} strokeWidth={isActive ? 3 : 2} />
+                      {item.label}
+                    </motion.button>
+                  );
+                })}
+              </nav>
+              
+              <div className="p-4 border-t dark:border-slate-800 space-y-4">
+                <div className="flex items-center gap-3 p-3 rounded-2xl bg-white/50 dark:bg-slate-800/50 border dark:border-slate-700 shadow-sm">
+                  <div className="relative">
+                    <img src={user.avatar} alt="" className="w-10 h-10 rounded-xl" />
+                    <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white dark:border-slate-800 rounded-full" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold text-slate-900 dark:text-white truncate">{user.name}</p>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate tracking-tight">{user.email}</p>
+                  </div>
+                </div>
               </div>
             </div>
-
-            {/* Bottom Actions */}
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                onClick={handleLanguageToggle}
-                className="flex items-center justify-center gap-1 p-3 bg-slate-100 dark:bg-slate-800 rounded-2xl text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors text-xs font-bold"
-                title="Toggle Language"
-              >
-                {uiLanguage === Language.ENGLISH ? 'EN' : 'HI'}
-              </button>
-               <button 
-                onClick={toggleDarkMode}
-                className="flex items-center justify-center gap-2 p-3 bg-slate-100 dark:bg-slate-800 rounded-2xl text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-                title="Toggle Theme"
-              >
-                {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
-              </button>
-              <button 
-                onClick={onLogout}
-                className="flex items-center justify-center gap-2 p-3 bg-red-50 dark:bg-red-900/20 rounded-2xl text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors"
-                title="Logout"
-              >
-                <LogOut size={18} />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       
       {/* Overlay */}
-      {isMobileMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-30 md:hidden"
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
-      )}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-30 md:hidden"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 };

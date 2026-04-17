@@ -15,6 +15,7 @@ import { AppView, User, DashboardStats } from "./types";
 import { generateDashboardInsights } from "./services/geminiService";
 import { Layout, MessageCircle, Camera, PenTool, Menu } from "lucide-react";
 import { SpaceBackground } from "./components/SpaceBackground";
+import { motion, AnimatePresence } from "framer-motion";
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<AppView>(AppView.DASHBOARD);
@@ -132,7 +133,17 @@ const App: React.FC = () => {
         <main className="flex-1 overflow-y-auto relative h-screen">
           <div className="p-4 md:p-8 max-w-7xl mx-auto pb-32 md:pb-8">
             <OfflineBanner />
-            {renderView()}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentView}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+              >
+                {renderView()}
+              </motion.div>
+            </AnimatePresence>
           </div>
 
           {/* Floating Background Decorations (Parity with Educlarity) */}
