@@ -136,7 +136,7 @@ const App: React.FC = () => {
   return (
     <div className={isDarkMode ? "dark" : ""}>
       <div className="bg-slate-50 dark:bg-slate-950 font-sans min-h-screen text-slate-900 dark:text-slate-100 transition-colors duration-500 relative flex flex-col md:flex-row overflow-x-hidden w-full max-w-full">
-        {/* India Map Background for Dark Mode */}
+        {/* India Map Background */}
         {isDarkMode && (
           <div className="fixed inset-0 pointer-events-none opacity-[0.03] z-0 overflow-hidden">
             <svg viewBox="0 0 1000 1200" className="w-full h-full object-contain scale-150">
@@ -162,8 +162,8 @@ const App: React.FC = () => {
           />
         </div>
 
-        {/* Mobile Sidebar Overlay (Drawer) */}
-        <div className="md:hidden z-[100]">
+        {/* Mobile Sidebar Overlay (Drawer style) */}
+        <div className="md:hidden">
           <Sidebar
             currentView={currentView}
             onChangeView={setCurrentView}
@@ -177,12 +177,12 @@ const App: React.FC = () => {
           />
         </div>
 
-        {/* Main Content Area */}
-        <div className="flex-1 flex flex-col min-w-0 w-full relative min-h-screen">
-          {/* Top FIXED Header (Educlarity Style) */}
+        {/* Main Content Area - Constant Sidebar/Header Layout */}
+        <div className="flex-1 flex flex-col min-w-0 w-full relative h-screen overflow-hidden">
+          {/* Top FIXED Constant Header */}
           <header className="md:hidden fixed top-0 left-0 right-0 z-[60] flex items-center justify-between px-5 h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/50 dark:border-white/10 w-full box-border shadow-sm">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/20">
+              <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
                 <BrainCircuit className="text-white w-5 h-5" />
               </div>
               <span className="font-bold text-slate-800 dark:text-white text-lg tracking-tight">
@@ -193,13 +193,13 @@ const App: React.FC = () => {
             <div className="flex items-center gap-1">
               <button
                 onClick={() => setIsDarkMode(!isDarkMode)}
-                className="p-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all active:scale-90"
+                className="p-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all"
               >
                 {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
               </button>
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="p-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all active:scale-90"
+                className="p-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg"
               >
                 <Menu size={24} />
               </button>
@@ -213,8 +213,8 @@ const App: React.FC = () => {
             </div>
           </main>
 
-          {/* Bottom FIXED Navigation (Educlarity Style) */}
-          <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-t border-slate-200/50 dark:border-white/10 z-[60] px-4 flex items-center justify-around w-full box-border">
+          {/* Bottom FIXED Constant Navigation */}
+          <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-t border-slate-200/50 dark:border-white/10 z-[60] px-4 flex items-center justify-around w-full box-border shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
             {[
               { id: AppView.DASHBOARD, icon: Home, label: 'Home' },
               { id: AppView.CONCEPT_COACH, icon: MessageSquare, label: 'Coach' },
@@ -231,7 +231,7 @@ const App: React.FC = () => {
                     setCurrentView(item.id);
                     setIsMobileMenuOpen(false);
                   }}
-                  className="relative flex flex-col items-center justify-center p-2 group"
+                  className="relative flex flex-col items-center justify-center p-2 group transition-all"
                 >
                   {isActive && (
                     <span className="absolute inset-0 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl transition-all scale-110" />
