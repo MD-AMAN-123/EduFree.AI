@@ -135,20 +135,11 @@ const App: React.FC = () => {
 
   return (
     <div className={isDarkMode ? "dark" : ""}>
-      <div className="bg-slate-50 dark:bg-slate-950 font-sans min-h-screen text-slate-900 dark:text-slate-100 transition-colors duration-500 relative flex flex-col md:flex-row overflow-x-hidden w-full max-w-full">
-        {/* India Map Background */}
-        {isDarkMode && (
-          <div className="fixed inset-0 pointer-events-none opacity-[0.03] z-0 overflow-hidden">
-            <svg viewBox="0 0 1000 1200" className="w-full h-full object-contain scale-150">
-               <path d="M480,200 L500,180 L550,190 L600,220 L620,280 L650,320 L700,350 L720,400 L710,480 L680,550 L630,620 L580,700 L550,780 L520,850 L500,920 L480,980 L450,1020 L400,1050 L350,1020 L320,950 L300,880 L280,820 L270,750 L280,680 L310,620 L340,550 L360,480 L370,420 L380,350 L400,280 L430,220 Z" fill="currentColor" />
-            </svg>
-          </div>
-        )}
-        
+      <div className="bg-slate-50 dark:bg-slate-950 font-sans min-h-screen text-slate-900 dark:text-slate-100 relative flex flex-col md:flex-row overflow-hidden w-full max-w-full">
         <SpaceBackground isDarkMode={isDarkMode} />
         
-        {/* Sidebar - Desktop */}
-        <div className="hidden md:flex shrink-0 h-screen sticky top-0 relative z-10">
+        {/* Sidebar - Desktop Only */}
+        <div className="hidden md:flex shrink-0 h-screen sticky top-0">
           <Sidebar
             currentView={currentView}
             onChangeView={setCurrentView}
@@ -177,10 +168,10 @@ const App: React.FC = () => {
           />
         </div>
 
-        {/* Main Content Area - Constant Sidebar/Header Layout */}
-        <div className="flex-1 flex flex-col min-w-0 w-full relative h-screen overflow-hidden">
-          {/* Top FIXED Constant Header */}
-          <header className="md:hidden fixed top-0 left-0 right-0 z-[60] flex items-center justify-between px-5 h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/50 dark:border-white/10 w-full box-border shadow-sm">
+        {/* Main Content Area - Enforced Vertical Isolation */}
+        <div className="flex-1 flex flex-col min-w-0 w-full relative h-[100dvh] overflow-hidden">
+          {/* Top FIXED Header for Mobile */}
+          <header className="md:hidden fixed top-0 left-0 right-0 z-[60] flex items-center justify-between px-5 h-16 bg-white/90 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/50 dark:border-white/10 w-full box-border shadow-sm">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
                 <BrainCircuit className="text-white w-5 h-5" />
@@ -206,15 +197,15 @@ const App: React.FC = () => {
             </div>
           </header>
 
-          <main className="flex-1 w-full relative pt-16 pb-16 md:pt-0 md:pb-0 overflow-y-auto overflow-x-hidden">
+          <main className="flex-1 w-full relative pt-16 pb-16 overflow-y-auto overflow-x-hidden">
             <div className="p-4 md:p-8 w-full max-w-full mx-auto box-border">
               <OfflineBanner />
               {renderView()}
             </div>
           </main>
 
-          {/* Bottom FIXED Constant Navigation */}
-          <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-t border-slate-200/50 dark:border-white/10 z-[60] px-4 flex items-center justify-around w-full box-border shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
+          {/* Bottom FIXED Navigation for Mobile */}
+          <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white/90 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200/50 dark:border-white/10 z-[60] px-4 flex items-center justify-around w-full box-border shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
             {[
               { id: AppView.DASHBOARD, icon: Home, label: 'Home' },
               { id: AppView.CONCEPT_COACH, icon: MessageSquare, label: 'Coach' },
