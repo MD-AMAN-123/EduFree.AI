@@ -138,7 +138,7 @@ const App: React.FC = () => {
       <div className="bg-slate-50 dark:bg-slate-950 font-sans min-h-screen text-slate-900 dark:text-slate-100 transition-colors duration-500 relative flex flex-col md:flex-row overflow-x-hidden w-full max-w-full">
         <SpaceBackground isDarkMode={isDarkMode} />
         
-        {/* Sidebar - Desktop Only with md:flex wrapper */}
+        {/* Sidebar - Desktop Only */}
         <div className="hidden md:flex shrink-0 h-screen sticky top-0">
           <Sidebar
             currentView={currentView}
@@ -169,9 +169,9 @@ const App: React.FC = () => {
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1 flex flex-col min-w-0 w-full relative min-h-screen">
-          {/* Top FIXED Header for Mobile */}
-          <header className="md:hidden fixed top-0 left-0 right-0 z-[60] flex items-center justify-between p-4 bg-white/90 dark:bg-slate-950/90 backdrop-blur-2xl border-b dark:border-slate-800 w-screen box-border shadow-sm h-16">
+        <div className="flex-1 flex flex-col min-w-0 w-full relative min-h-screen overflow-x-hidden">
+          {/* Top FIXED Header for Mobile - Spanning Edge to Edge */}
+          <header className="md:hidden fixed top-0 left-0 right-0 z-[60] flex items-center justify-between p-4 bg-white/90 dark:bg-slate-950/90 backdrop-blur-2xl border-b dark:border-slate-800 w-full box-border shadow-sm h-16">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/20">
                 <BrainCircuit className="text-white w-5 h-5" />
@@ -187,25 +187,23 @@ const App: React.FC = () => {
                 {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
               </button>
               <button
-                onClick={() => {
-                  setIsMobileMenuOpen(!isMobileMenuOpen);
-                }}
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all active:scale-90"
               >
-                {isMobileMenuOpen ? <X size={24} className="text-slate-600 dark:text-slate-400" /> : <Menu size={24} className="text-slate-600 dark:text-slate-400" />}
+                {isMobileMenuOpen ? <X size={24} className="text-slate-600 dark:text-slate-400" /> : <Menu className="text-slate-600 dark:text-slate-400" size={24} />}
               </button>
             </div>
           </header>
 
-          <main className="flex-1 w-full relative pt-16 pb-20 md:pt-0 md:pb-0 overflow-y-auto overflow-x-hidden">
+          <main className="flex-1 w-full relative pt-16 pb-20 md:pt-0 md:pb-0 overflow-y-auto overflow-x-hidden max-w-full">
             <div className="p-4 md:p-8 w-full max-w-full mx-auto box-border">
               <OfflineBanner />
               {renderView()}
             </div>
           </main>
 
-          {/* Bottom FIXED Navigation for Mobile */}
-          <nav className="md:hidden fixed bottom-0 left-0 right-0 h-20 bg-white/90 dark:bg-slate-950/90 backdrop-blur-2xl border-t dark:border-slate-800 z-[60] px-6 flex items-center justify-between pb-4 shadow-[0_-10px_30px_rgba(0,0,0,0.1)] w-screen box-border">
+          {/* Bottom FIXED Navigation for Mobile - Spanning Edge to Edge */}
+          <nav className="md:hidden fixed bottom-0 left-0 right-0 h-20 bg-white/90 dark:bg-slate-950/90 backdrop-blur-2xl border-t dark:border-slate-800 z-[60] px-6 flex items-center justify-between pb-4 shadow-[0_-10px_30px_rgba(0,0,0,0.1)] w-full box-border">
             {[
               { id: AppView.DASHBOARD, icon: Home, label: 'Home' },
               { id: AppView.CONCEPT_COACH, icon: MessageSquare, label: 'Coach' },

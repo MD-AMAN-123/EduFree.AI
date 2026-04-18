@@ -17,8 +17,8 @@ html,
 body,
 #root {
   overflow-x: hidden !important;
-  width: 100vw;
-  max-width: 100%;
+  width: 100% !important;
+  max-width: 100% !important;
   position: relative;
   margin: 0;
   padding: 0;
