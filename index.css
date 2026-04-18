@@ -8,22 +8,31 @@
   --color-accent: #f59e0b;
 }
 
-:root {
-  --primary: #4f46e5;
-  --primary-hover: #4338ca;
-  --secondary: #7c3aed;
-  --accent: #f59e0b;
+* {
+  box-sizing: border-box;
+  @apply transition-colors duration-200;
 }
 
-@layer base {
-  body {
-    @apply bg-slate-50 text-slate-900 antialiased selection:bg-indigo-100 selection:text-indigo-900 transition-colors duration-500;
-  }
-  
-  html.dark body {
-    @apply bg-slate-950 text-slate-100;
-  }
+html,
+body,
+#root {
+  overflow-x: hidden !important;
+  width: 100vw;
+  max-width: 100%;
+  position: relative;
+  margin: 0;
+  padding: 0;
+  touch-action: pan-y;
 }
+
+body {
+  @apply bg-slate-50 text-slate-900 antialiased selection:bg-indigo-100 selection:text-indigo-900 transition-colors duration-500;
+}
+
+html.dark body {
+  @apply bg-slate-950 text-slate-100;
+}
+
 
 @layer components {
   .glass-card {
@@ -43,7 +52,11 @@
   }
 }
 
-.dark main, .dark #root, .dark .bg-white, .dark .bg-slate-800, .dark .bg-slate-900 {
+.dark main,
+.dark #root,
+.dark .bg-white,
+.dark .bg-slate-800,
+.dark .bg-slate-900 {
   background-color: rgba(15, 23, 42, 0.4) !important;
   backdrop-filter: blur(40px) saturate(180%);
   border-color: rgba(255, 255, 255, 0.05) !important;
@@ -86,8 +99,15 @@
 }
 
 @keyframes neonGlow {
-  0%, 100% { filter: drop-shadow(0 0 15px rgba(79, 70, 229, 0.4)); }
-  50% { filter: drop-shadow(0 0 30px rgba(79, 70, 229, 0.8)); }
+
+  0%,
+  100% {
+    filter: drop-shadow(0 0 15px rgba(79, 70, 229, 0.4));
+  }
+
+  50% {
+    filter: drop-shadow(0 0 30px rgba(79, 70, 229, 0.8));
+  }
 }
 
 .animate-neon {
@@ -96,8 +116,15 @@
 
 /* AI Message Bubble animations */
 @keyframes slideIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-slide-in {
@@ -108,7 +135,7 @@
   .mobile-safe-bottom {
     @apply pb-24 md:pb-8;
   }
-  
+
   .responsive-btn {
     @apply w-full md:w-auto px-6 py-4 rounded-2xl font-bold transition-all active:scale-95;
   }

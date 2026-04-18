@@ -135,11 +135,11 @@ const App: React.FC = () => {
 
   return (
     <div className={isDarkMode ? "dark" : ""}>
-      {/* Root Layout - Removed horizontal flex dependency on mobile */}
-      <div className="bg-slate-50 dark:bg-transparent font-sans min-h-screen text-slate-900 dark:text-slate-100 transition-colors duration-500 relative flex flex-col md:flex-row overflow-x-hidden">
+      {/* Root Layout - Strict clipping to prevent horizontal scroll */}
+      <div className="bg-slate-50 dark:bg-transparent font-sans min-h-screen text-slate-900 dark:text-slate-100 transition-colors duration-500 relative flex flex-col md:flex-row overflow-x-hidden max-w-full">
         <SpaceBackground isDarkMode={isDarkMode} />
-
-        {/* Sidebar handles its own fixed positioning on mobile */}
+        
+        {/* Sidebar - Positioned fixedly on mobile to avoid layout shift */}
         <Sidebar
           currentView={currentView}
           onChangeView={setCurrentView}
@@ -152,28 +152,28 @@ const App: React.FC = () => {
           toggleDarkMode={() => setIsDarkMode(!isDarkMode)}
         />
 
-        {/* Unified App Container */}
-        <div className="flex-1 flex flex-col min-w-0 w-full relative">
-          {/* Mobile Header - Grouped Controls */}
-          <header className="md:hidden sticky top-0 z-30 flex items-center justify-between p-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b dark:border-slate-800 w-full">
+        {/* Unified App Container - Using w-full/min-w-0 for flex-1 stability */}
+        <div className="flex-1 flex flex-col min-w-0 w-full relative h-screen overflow-hidden">
+          {/* Mobile Header - Sticky with box-border padding */}
+          <header className="md:hidden sticky top-0 z-30 flex items-center justify-between p-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b dark:border-slate-800 w-full box-border">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
                 <BrainCircuit className="text-white w-5 h-5" />
               </div>
-              <span className="font-bold dark:text-white">EduFree.AI</span>
+              <span className="font-bold dark:text-white text-lg tracking-tight">EduFree.AI</span>
             </div>
-
-            <div className="flex items-center gap-2">
+            
+            <div className="flex items-center gap-3">
               <button
                 onClick={() => setIsDarkMode(!isDarkMode)}
-                className="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
+                className="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors active:scale-90"
                 aria-label="Toggle Theme"
               >
-                {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+                {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
               </button>
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors active:scale-90"
                 aria-label="Toggle Menu"
               >
                 {isMobileMenuOpen ? <X size={24} className="text-slate-600 dark:text-slate-400" /> : <Menu className="text-slate-600 dark:text-slate-400" size={24} />}
@@ -181,12 +181,20 @@ const App: React.FC = () => {
             </div>
           </header>
 
-          <main className="flex-1 w-full overflow-y-auto">
-            <div className="p-4 md:p-8 max-w-full mx-auto pb-10">
+          <main className="flex-1 w-full overflow-y-auto overflow-x-hidden">
+            <div className="p-4 md:p-8 w-full max-w-full mx-auto pb-10 box-border">
               <OfflineBanner />
-              {renderView()}
+              <div className="w-full">
+                {renderView()}
+              </div>
             </div>
           </main>
+        </div>
+
+        {/* Backdrop Clipping Container - Ensures zero horizontal expansion */}
+        <div className="fixed inset-0 z-[-10] overflow-hidden pointer-events-none">
+           <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[120px] -mr-[200px] -mt-[200px]"></div>
+           <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-purple-500/10 rounded-full blur-[100px] -ml-[150px] -mb-[150px]"></div>
         </div>
       </div>
     </div>
