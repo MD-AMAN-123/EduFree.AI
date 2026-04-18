@@ -94,20 +94,20 @@ const Dashboard: React.FC<DashboardProps> = ({ user, stats, onNavigate, lastActi
           <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Welcome back, {firstName}! 👋</h1>
           <p className="text-slate-500 dark:text-slate-400 mt-1">You're on a roll! Keep up the great work.</p>
         </div>
-        <div className="flex gap-4">
+        <div className="flex flex-wrap items-center gap-3 sm:gap-4 w-full sm:w-auto">
           <LivePulse />
-          <div className="bg-orange-50 dark:bg-orange-900/20 px-4 py-2 rounded-2xl flex items-center gap-2 border border-orange-100 dark:border-orange-500/20 shadow-sm">
-            <span className="text-2xl">🔥</span>
+          <div className="flex-1 sm:flex-none bg-orange-50 dark:bg-orange-900/20 px-3 sm:px-4 py-2 rounded-2xl flex items-center gap-2 border border-orange-100 dark:border-orange-500/20 shadow-sm min-w-[100px]">
+            <span className="text-xl sm:text-2xl">🔥</span>
             <div>
-              <p className="text-[10px] uppercase tracking-wider font-bold text-orange-600 dark:text-orange-400">Streak</p>
-              <p className="text-lg font-bold text-slate-800 dark:text-slate-100 leading-none">{stats?.streak || 0} Days</p>
+              <p className="text-[9px] sm:text-[10px] uppercase tracking-wider font-bold text-orange-600 dark:text-orange-400">Streak</p>
+              <p className="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100 leading-none">{stats?.streak || 0} Days</p>
             </div>
           </div>
-          <div className="bg-indigo-50 dark:bg-indigo-900/20 px-4 py-2 rounded-2xl flex items-center gap-2 border border-indigo-100 dark:border-indigo-500/20 shadow-sm">
-            <span className="text-2xl">💎</span>
+          <div className="flex-1 sm:flex-none bg-indigo-50 dark:bg-indigo-900/20 px-3 sm:px-4 py-2 rounded-2xl flex items-center gap-2 border border-indigo-100 dark:border-indigo-500/20 shadow-sm min-w-[100px]">
+            <span className="text-xl sm:text-2xl">💎</span>
             <div>
-              <p className="text-[10px] uppercase tracking-wider font-bold text-indigo-600 dark:text-indigo-400">Total XP</p>
-              <p className="text-lg font-bold text-slate-800 dark:text-slate-100 leading-none">{stats?.xp?.toLocaleString() || 0}</p>
+              <p className="text-[9px] sm:text-[10px] uppercase tracking-wider font-bold text-indigo-600 dark:text-indigo-400">Total XP</p>
+              <p className="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100 leading-none">{stats?.xp?.toLocaleString() || 0}</p>
             </div>
           </div>
         </div>
