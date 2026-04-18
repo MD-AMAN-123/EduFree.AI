@@ -32,7 +32,7 @@ import {
   GraduationCap,
   BrainCircuit,
   Camera,
-  PenTool
+  FileText
 } from 'lucide-react';
 import { SpaceBackground } from "./components/SpaceBackground";
 
@@ -135,11 +135,9 @@ const App: React.FC = () => {
 
   return (
     <div className={isDarkMode ? "dark" : ""}>
-      {/* Root Layout - Strict clipping to prevent horizontal scroll */}
       <div className="bg-slate-50 dark:bg-transparent font-sans min-h-screen text-slate-900 dark:text-slate-100 transition-colors duration-500 relative flex flex-col md:flex-row overflow-x-hidden max-w-full">
         <SpaceBackground isDarkMode={isDarkMode} />
         
-        {/* Sidebar - Positioned fixedly on mobile to avoid layout shift */}
         <Sidebar
           currentView={currentView}
           onChangeView={setCurrentView}
@@ -152,49 +150,64 @@ const App: React.FC = () => {
           toggleDarkMode={() => setIsDarkMode(!isDarkMode)}
         />
 
-        {/* Unified App Container - Using w-full/min-w-0 for flex-1 stability */}
         <div className="flex-1 flex flex-col min-w-0 w-full relative h-screen overflow-hidden">
-          {/* Mobile Header - Sticky with box-border padding */}
+          {/* Sticky Top Header */}
           <header className="md:hidden sticky top-0 z-30 flex items-center justify-between p-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b dark:border-slate-800 w-full box-border">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
                 <BrainCircuit className="text-white w-5 h-5" />
               </div>
-              <span className="font-bold dark:text-white text-lg tracking-tight">EduFree.AI</span>
+              <span className="font-bold dark:text-white text-lg">EduFree.AI</span>
             </div>
             
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setIsDarkMode(!isDarkMode)}
-                className="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors active:scale-90"
-                aria-label="Toggle Theme"
+                className="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
               >
                 {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
               </button>
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors active:scale-90"
-                aria-label="Toggle Menu"
+                className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
               >
-                {isMobileMenuOpen ? <X size={24} className="text-slate-600 dark:text-slate-400" /> : <Menu className="text-slate-600 dark:text-slate-400" size={24} />}
+                {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
             </div>
           </header>
 
-          <main className="flex-1 w-full overflow-y-auto overflow-x-hidden">
-            <div className="p-4 md:p-8 w-full max-w-full mx-auto pb-10 box-border">
+          <main className="flex-1 w-full overflow-y-auto overflow-x-hidden relative">
+            <div className="p-4 md:p-8 w-full max-w-full mx-auto pb-32 md:pb-8">
               <OfflineBanner />
-              <div className="w-full">
-                {renderView()}
-              </div>
+              {renderView()}
             </div>
           </main>
-        </div>
 
-        {/* Backdrop Clipping Container - Ensures zero horizontal expansion */}
-        <div className="fixed inset-0 z-[-10] overflow-hidden pointer-events-none">
-           <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[120px] -mr-[200px] -mt-[200px]"></div>
-           <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-purple-500/10 rounded-full blur-[100px] -ml-[150px] -mb-[150px]"></div>
+          {/* Sticky Bottom Navigation */}
+          <nav className="md:hidden fixed bottom-0 left-0 right-0 h-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t dark:border-slate-800 z-50 px-6 flex items-center justify-between pb-4 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
+            {[
+              { id: AppView.DASHBOARD, icon: Home, label: 'Home' },
+              { id: AppView.CONCEPT_COACH, icon: MessageSquare, label: 'Coach' },
+              { id: AppView.DOUBT_SOLVER, icon: Camera, label: 'Ask' },
+              { id: AppView.EXAM_ARENA, icon: Zap, label: 'Arena' },
+              { id: AppView.ASSIGNMENT_GENERATOR, icon: FileText, label: 'Tasks' },
+            ].map((item) => {
+              const isActive = currentView === item.id;
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setCurrentView(item.id)}
+                  className={`flex flex-col items-center gap-1 transition-all ${
+                    isActive ? 'text-indigo-600 dark:text-indigo-400 scale-110' : 'text-slate-400'
+                  }`}
+                >
+                  <Icon size={22} strokeWidth={isActive ? 2.5 : 2} />
+                  <span className="text-[10px] font-bold uppercase tracking-tighter">{item.label}</span>
+                </button>
+              );
+            })}
+          </nav>
         </div>
       </div>
     </div>
