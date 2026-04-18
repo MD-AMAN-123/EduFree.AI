@@ -181,10 +181,8 @@ const App: React.FC = () => {
             </div>
           </header>
 
-          {/* PAGE CONTENT CONTAINER - THE ONLY SCROLLABLE AREA */}
-          <main className="flex-1 overflow-y-auto overflow-x-hidden relative h-full w-full overscroll-contain touch-pan-y pt-2 pb-2">
-            <div className="pb-32 md:pb-8"> {/* Internal padding to prevent nav overlap */}
-              <div className="p-4 md:p-8 max-w-7xl mx-auto w-full box-border">
+            <div className={`${(currentView === AppView.CONCEPT_COACH || currentView === AppView.DOUBT_SOLVER) ? '' : 'pb-32 md:pb-8'}`}>
+              <div className={`${(currentView === AppView.CONCEPT_COACH || currentView === AppView.DOUBT_SOLVER) ? 'p-0' : 'p-4 md:p-8'} max-w-7xl mx-auto w-full box-border`}>
                 <OfflineBanner />
                 {renderView()}
               </div>

@@ -300,7 +300,7 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
   };
 
   return (
-    <div className="h-[calc(100vh-64px)] md:h-screen flex flex-col bg-slate-50 dark:bg-slate-950 relative">
+    <div className="h-full flex flex-col bg-slate-50 dark:bg-slate-950 relative overflow-hidden">
       {/* Header */}
       <div className="bg-white dark:bg-slate-900 border-b dark:border-slate-800 p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 z-10 shadow-sm">
         <div>
