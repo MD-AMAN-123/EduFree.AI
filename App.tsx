@@ -139,7 +139,7 @@ const App: React.FC = () => {
         <SpaceBackground isDarkMode={isDarkMode} />
         
         {/* Sidebar - Desktop Only with md:flex wrapper */}
-        <div className="hidden md:flex shrink-0">
+        <div className="hidden md:flex shrink-0 h-screen sticky top-0">
           <Sidebar
             currentView={currentView}
             onChangeView={setCurrentView}
@@ -153,23 +153,25 @@ const App: React.FC = () => {
           />
         </div>
 
-        {/* Mobile Sidebar Overlay (if drawer is used) */}
-        <Sidebar
-          currentView={currentView}
-          onChangeView={setCurrentView}
-          isMobileMenuOpen={isMobileMenuOpen}
-          setIsMobileMenuOpen={setIsMobileMenuOpen}
-          user={user}
-          onLogout={handleLogout}
-          onUpdateUser={setUser}
-          isDarkMode={isDarkMode}
-          toggleDarkMode={() => setIsDarkMode(!isDarkMode)}
-        />
+        {/* Mobile Sidebar Overlay (Drawer) */}
+        <div className="md:hidden">
+          <Sidebar
+            currentView={currentView}
+            onChangeView={setCurrentView}
+            isMobileMenuOpen={isMobileMenuOpen}
+            setIsMobileMenuOpen={setIsMobileMenuOpen}
+            user={user}
+            onLogout={handleLogout}
+            onUpdateUser={setUser}
+            isDarkMode={isDarkMode}
+            toggleDarkMode={() => setIsDarkMode(!isDarkMode)}
+          />
+        </div>
 
         {/* Main Content Area */}
-        <div className="flex-1 flex flex-col min-w-0 w-full relative">
-          {/* Top Sticky Header */}
-          <header className="md:hidden sticky top-0 left-0 right-0 z-[60] flex items-center justify-between p-4 bg-white/90 dark:bg-slate-950/90 backdrop-blur-2xl border-b dark:border-slate-800 w-full box-border shadow-sm">
+        <div className="flex-1 flex flex-col min-w-0 w-full relative min-h-screen">
+          {/* Top FIXED Header for Mobile */}
+          <header className="md:hidden fixed top-0 left-0 right-0 z-[60] flex items-center justify-between p-4 bg-white/90 dark:bg-slate-950/90 backdrop-blur-2xl border-b dark:border-slate-800 w-screen box-border shadow-sm h-16">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/20">
                 <BrainCircuit className="text-white w-5 h-5" />
@@ -180,33 +182,35 @@ const App: React.FC = () => {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setIsDarkMode(!isDarkMode)}
-                className="p-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all active:scale-90"
+                className="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all active:scale-90"
               >
                 {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
               </button>
               <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="p-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all active:scale-90"
+                onClick={() => {
+                  setIsMobileMenuOpen(!isMobileMenuOpen);
+                }}
+                className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all active:scale-90"
               >
                 {isMobileMenuOpen ? <X size={24} className="text-slate-600 dark:text-slate-400" /> : <Menu size={24} className="text-slate-600 dark:text-slate-400" />}
               </button>
             </div>
           </header>
 
-          <main className="flex-1 w-full relative">
-            <div className="p-4 md:p-8 w-full max-w-full mx-auto pb-28 md:pb-8 box-border min-h-screen">
+          <main className="flex-1 w-full relative pt-16 pb-20 md:pt-0 md:pb-0 overflow-y-auto overflow-x-hidden">
+            <div className="p-4 md:p-8 w-full max-w-full mx-auto box-border">
               <OfflineBanner />
               {renderView()}
             </div>
           </main>
 
-          {/* Bottom Sticky Navigation - Fixed to Viewport Bottom */}
-          <nav className="md:hidden fixed bottom-0 left-0 right-0 h-20 bg-white/90 dark:bg-slate-950/90 backdrop-blur-2xl border-t dark:border-slate-800 z-[60] px-6 flex items-center justify-between pb-4 shadow-[0_-10px_30px_rgba(0,0,0,0.1)]">
+          {/* Bottom FIXED Navigation for Mobile */}
+          <nav className="md:hidden fixed bottom-0 left-0 right-0 h-20 bg-white/90 dark:bg-slate-950/90 backdrop-blur-2xl border-t dark:border-slate-800 z-[60] px-6 flex items-center justify-between pb-4 shadow-[0_-10px_30px_rgba(0,0,0,0.1)] w-screen box-border">
             {[
               { id: AppView.DASHBOARD, icon: Home, label: 'Home' },
               { id: AppView.CONCEPT_COACH, icon: MessageSquare, label: 'Coach' },
               { id: AppView.DOUBT_SOLVER, icon: Camera, label: 'Ask' },
-              { id: AppView.EXAM_ARENA, icon: Zap, label: 'Arena' },
+              { id: AppView.LEADERBOARD, icon: Trophy, label: 'Ranking' },
               { id: AppView.ASSIGNMENT_GENERATOR, icon: FileText, label: 'Tasks' },
             ].map((item) => {
               const isActive = currentView === item.id;
@@ -219,7 +223,7 @@ const App: React.FC = () => {
                     setIsMobileMenuOpen(false);
                   }}
                   className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${
-                    isActive ? 'text-indigo-600 dark:text-indigo-400 scale-110' : 'text-slate-400 dark:text-slate-500'
+                    isActive ? 'text-indigo-600 dark:text-indigo-400 scale-110 font-bold' : 'text-slate-400 dark:text-slate-500'
                   }`}
                 >
                   <div className={`p-1.5 rounded-xl transition-colors ${isActive ? 'bg-indigo-50 dark:bg-indigo-900/20' : ''}`}>
