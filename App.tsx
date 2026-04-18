@@ -138,7 +138,7 @@ const App: React.FC = () => {
       {/* Absolute Root Viewport Lock */}
       <div className="fixed inset-0 h-screen w-screen overflow-hidden bg-slate-50 dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-100 flex flex-col md:flex-row transition-colors duration-500 overscroll-none touch-none">
         <SpaceBackground isDarkMode={isDarkMode} />
-        
+
         {/* Sidebar - Direct Parent for Mobile/Desktop Overlay */}
         <Sidebar
           currentView={currentView}
@@ -154,7 +154,7 @@ const App: React.FC = () => {
 
         {/* Dynamic App Shell */}
         <div className="flex-1 flex flex-col min-w-0 h-full relative overflow-hidden">
-          
+
           {/* TOP BAR - GUARANTEED IMMOVABLE */}
           <header className="md:hidden shrink-0 h-16 bg-white/90 dark:bg-slate-900/95 backdrop-blur-xl border-b border-slate-200 dark:border-white/10 flex items-center justify-between px-5 relative z-[60] shadow-sm">
             <div className="flex items-center gap-2">
@@ -181,6 +181,7 @@ const App: React.FC = () => {
             </div>
           </header>
 
+          <main className="flex-1 overflow-y-auto overflow-x-hidden relative h-full w-full overscroll-contain touch-pan-y pt-2">
             <div className={`${(currentView === AppView.CONCEPT_COACH || currentView === AppView.DOUBT_SOLVER) ? '' : 'pb-32 md:pb-8'}`}>
               <div className={`${(currentView === AppView.CONCEPT_COACH || currentView === AppView.DOUBT_SOLVER) ? 'p-0' : 'p-4 md:p-8'} max-w-7xl mx-auto w-full box-border`}>
                 <OfflineBanner />
@@ -212,9 +213,9 @@ const App: React.FC = () => {
                   {isActive && (
                     <span className="absolute inset-x-0 inset-y-1 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl transition-all scale-110" />
                   )}
-                  <Icon 
-                    size={22} 
-                    className={`relative z-10 transition-transform duration-300 ${isActive ? 'text-indigo-600 dark:text-indigo-400 scale-110' : 'text-slate-500 dark:text-slate-400'}`} 
+                  <Icon
+                    size={22}
+                    className={`relative z-10 transition-transform duration-300 ${isActive ? 'text-indigo-600 dark:text-indigo-400 scale-110' : 'text-slate-500 dark:text-slate-400'}`}
                   />
                   <span className={`relative z-10 text-[9px] font-bold mt-1.5 transition-colors uppercase tracking-widest ${isActive ? 'text-indigo-600 dark:text-indigo-400 opacity-100' : 'text-slate-500 dark:text-slate-400 opacity-70'}`}>
                     {item.label}
