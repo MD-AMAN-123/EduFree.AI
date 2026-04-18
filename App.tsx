@@ -181,9 +181,9 @@ const App: React.FC = () => {
             </div>
           </header>
 
-          <main className="flex-1 overflow-y-auto overflow-x-hidden relative h-full w-full overscroll-contain touch-pan-y pt-2">
-            <div className={`${(currentView === AppView.CONCEPT_COACH || currentView === AppView.DOUBT_SOLVER) ? '' : 'pb-32 md:pb-8'}`}>
-              <div className={`${(currentView === AppView.CONCEPT_COACH || currentView === AppView.DOUBT_SOLVER) ? 'p-0' : 'p-4 md:p-8'} max-w-7xl mx-auto w-full box-border`}>
+          <main className="flex-1 overflow-y-auto overflow-x-hidden relative h-full w-full overscroll-contain touch-pan-y pt-2 flex flex-col">
+            <div className={`${(currentView === AppView.CONCEPT_COACH || currentView === AppView.DOUBT_SOLVER) ? 'flex-1' : 'pb-32 md:pb-8'}`}>
+              <div className={`${(currentView === AppView.CONCEPT_COACH || currentView === AppView.DOUBT_SOLVER) ? 'p-0 h-full flex flex-col' : 'p-4 md:p-8'} max-w-7xl mx-auto w-full box-border`}>
                 <OfflineBanner />
                 {renderView()}
               </div>
