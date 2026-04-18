@@ -135,11 +135,12 @@ const App: React.FC = () => {
 
   return (
     <div className={isDarkMode ? "dark" : ""}>
-      <div className="bg-slate-50 dark:bg-slate-950 font-sans min-h-screen text-slate-900 dark:text-slate-100 relative flex flex-col md:flex-row overflow-hidden w-full max-w-full">
+      {/* Root Container Locked to Viewport */}
+      <div className="fixed inset-0 overflow-hidden bg-slate-50 dark:bg-slate-950 font-sans text-slate-900 dark:text-slate-100 flex flex-col md:flex-row transition-colors duration-500">
         <SpaceBackground isDarkMode={isDarkMode} />
         
-        {/* Sidebar - Desktop Only */}
-        <div className="hidden md:flex shrink-0 h-screen sticky top-0">
+        {/* Desktop Sidebar */}
+        <div className="hidden md:flex shrink-0 h-full border-r border-slate-200 dark:border-white/5 relative z-50">
           <Sidebar
             currentView={currentView}
             onChangeView={setCurrentView}
@@ -153,7 +154,7 @@ const App: React.FC = () => {
           />
         </div>
 
-        {/* Mobile Sidebar Overlay (Drawer style) */}
+        {/* Mobile Global Sidebar Overlay (Managed by Portal/Z-Index) */}
         <div className="md:hidden">
           <Sidebar
             currentView={currentView}
@@ -168,10 +169,11 @@ const App: React.FC = () => {
           />
         </div>
 
-        {/* Main Content Area - Enforced Vertical Isolation */}
-        <div className="flex-1 flex flex-col min-w-0 w-full relative h-[100dvh] overflow-hidden">
-          {/* Top FIXED Header for Mobile */}
-          <header className="md:hidden fixed top-0 left-0 right-0 z-[60] flex items-center justify-between px-5 h-16 bg-white/90 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/50 dark:border-white/10 w-full box-border shadow-sm">
+        {/* Application Core Layout */}
+        <div className="flex-1 flex flex-col min-w-0 w-full h-full relative">
+          
+          {/* Constant Top Mobile Header */}
+          <header className="md:hidden shrink-0 h-16 bg-white/80 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/50 dark:border-white/10 flex items-center justify-between px-5 relative z-40 w-full shadow-sm">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
                 <BrainCircuit className="text-white w-5 h-5" />
@@ -180,32 +182,34 @@ const App: React.FC = () => {
                 EduFree<span className="text-indigo-600">.AI</span>
               </span>
             </div>
-            
             <div className="flex items-center gap-1">
               <button
                 onClick={() => setIsDarkMode(!isDarkMode)}
                 className="p-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all"
+                aria-label="Toggle dark mode"
               >
                 {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
               </button>
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className="p-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg"
+                aria-label="Open menu"
               >
                 <Menu size={24} />
               </button>
             </div>
           </header>
 
-          <main className="flex-1 w-full relative pt-16 pb-16 overflow-y-auto overflow-x-hidden">
-            <div className="p-4 md:p-8 w-full max-w-full mx-auto box-border">
+          {/* Main Scrollable Content */}
+          <main className="flex-1 overflow-y-auto overflow-x-hidden relative h-full w-full">
+            <div className="p-4 md:p-8 max-w-7xl mx-auto w-full box-border pb-24 md:pb-8">
               <OfflineBanner />
               {renderView()}
             </div>
           </main>
 
-          {/* Bottom FIXED Navigation for Mobile */}
-          <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white/90 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200/50 dark:border-white/10 z-[60] px-4 flex items-center justify-around w-full box-border shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
+          {/* Constant Bottom Mobile Navigation */}
+          <nav className="md:hidden shrink-0 h-16 bg-white/80 dark:bg-slate-900/90 backdrop-blur-md border-t border-slate-200/50 dark:border-white/10 flex items-center justify-around px-4 relative z-40 w-full shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
             {[
               { id: AppView.DASHBOARD, icon: Home, label: 'Home' },
               { id: AppView.CONCEPT_COACH, icon: MessageSquare, label: 'Coach' },
@@ -222,7 +226,8 @@ const App: React.FC = () => {
                     setCurrentView(item.id);
                     setIsMobileMenuOpen(false);
                   }}
-                  className="relative flex flex-col items-center justify-center p-2 group transition-all"
+                  className="relative flex flex-col items-center justify-center p-2 transition-all active:scale-90"
+                  aria-label={`Go to ${item.label}`}
                 >
                   {isActive && (
                     <span className="absolute inset-0 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl transition-all scale-110" />
