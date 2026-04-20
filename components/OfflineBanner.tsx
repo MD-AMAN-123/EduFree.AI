@@ -52,7 +52,7 @@ const OfflineBanner: React.FC = () => {
   return (
     <div className="flex items-center gap-3 px-4 py-2.5 mb-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/40 rounded-2xl text-amber-700 dark:text-amber-400 text-sm font-semibold">
       <WifiOff size={16} />
-      You're offline — AI Coach is using on-device mode. Progress will sync when you reconnect.
+      You're offline — AI Coach is using Gemma 4 on-device mode. Progress will sync when you reconnect.
     </div>
   );
 };

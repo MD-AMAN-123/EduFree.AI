@@ -22,9 +22,10 @@ const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
 // Import offline service for transparent fallback
 import { offlineAIService } from "./offlineAiService";
 
-const DEFAULT_MODEL = "gemini-1.5-flash"; 
-const FALLBACK_MODEL = "gemini-pro"; 
-const PRO_MODEL = "gemini-1.5-pro"; 
+const DEFAULT_MODEL = "gemma-4-31b-it"; 
+const FALLBACK_MODEL = "gemini-1.5-flash"; 
+const PRO_MODEL = "gemma-4-31b-it"; 
+const VISION_MODEL = "gemini-1.5-pro"; 
 
 /* ===============================
    PROMPTS & SYSTEM INSTRUCTIONS

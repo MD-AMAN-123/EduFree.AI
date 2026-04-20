@@ -20,8 +20,8 @@ const CustomerSupport: React.FC<CustomerSupportProps> = ({ user, isTeacherAuthen
       id: 'welcome',
       role: 'model',
       text: isTeacherAuthenticated 
-        ? 'Welcome, Teacher! I can help you manage your class. You can ask me to "Add a new student called Rahul with Grade A" or "Delete Arjun Verma".'
-        : 'Hi there! I am the EduFree Support Bot. How can I help you with your account or studies today?',
+        ? 'Welcome, Teacher! I can help you manage your class using the new Gemma 4 interface. You can ask me to "Add a new student called Rahul with Grade A" or "Delete Arjun Verma".'
+        : 'Hi there! I am the EduFree Support Bot, now enhanced with Gemma 4. How can I help you with your account or studies today?',
       timestamp: Date.now()
     }
   ]);
@@ -146,7 +146,7 @@ const CustomerSupport: React.FC<CustomerSupportProps> = ({ user, isTeacherAuthen
   const faqs = [
     { q: "How do I reset my password?", a: "Go to Profile Settings > Security > Change Password. If you are logged out, click 'Forgot Password' on the login screen." },
     { q: "Is the content available offline?", a: "Currently, you need an active internet connection to access the AI Coach and Exams. We are working on an offline mode!" },
-    { q: "How is my Originality Score calculated?", a: "We use Gemini AI to analyze your text patterns against common AI-generated structures and known databases." },
+    { q: "How is my Originality Score calculated?", a: "We use Gemma 4 AI to analyze your text patterns against common AI-generated structures and known databases for peak accuracy." },
     { q: "Can I upgrade my plan?", a: "Yes! Navigate to Settings > Subscription to view our Premium plans for unlimited AI queries." },
   ];
 

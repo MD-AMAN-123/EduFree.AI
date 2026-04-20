@@ -58,7 +58,7 @@ const AssignmentGenerator: React.FC<AssignmentGeneratorProps> = ({ onClearTopic 
             <div className="bg-indigo-600 p-2 rounded-xl text-white shadow-lg">
               <FileText size={24} />
             </div>
-            AI Assignment Generator
+            Gemma 4 Assignment Generator
           </h2>
           <p className="text-slate-500 dark:text-slate-400 mb-8 max-w-xl">
             Generate custom assignments instantly, fully offline. Test your knowledge with structured questions.

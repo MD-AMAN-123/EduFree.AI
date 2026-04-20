@@ -24,7 +24,7 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
     return [{
       id: 'welcome',
       role: 'model',
-      text: 'Hello! I am EduFree. I am here to tutor you even without internet. What should we learn today?',
+      text: 'Hello! I am EduFree, now powered by Gemma 4. I am here to tutor you with advanced reasoning even without internet. What should we learn today?',
       timestamp: Date.now()
     }];
   };
@@ -294,7 +294,7 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
     return (
       <div className="flex items-center gap-1.5 px-2 py-0.5 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-md text-[10px] font-bold border border-green-100 dark:border-green-800/30">
         <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
-        OFFLINE AI ACTIVE
+        GEMMA 4 OFFLINE ACTIVE
       </div>
     );
   };
