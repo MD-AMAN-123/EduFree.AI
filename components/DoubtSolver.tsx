@@ -98,7 +98,52 @@ const DoubtSolver: React.FC = () => {
             setLiveLog(prev => [...prev, logs[Math.floor(Math.random() * logs.length)]]);
           }, 800);
 
-          const result = await solveQuestionFromImage(base64);
+          let result;
+          if (navigator.onLine) {
+            result = await solveQuestionFromImage(base64);
+          } else {
+             // OFFLINE MODE: OCR -> Local LLM Stream
+             const { offlineAIService } = await import('../services/offlineAiService');
+             const extractedText = ocrResult.data.text;
+             
+             setLiveLog(["Offline mode detected", "Using OCR for text extraction...", "Generating local solution..."]);
+             
+             // Create initial solution state
+             const partialSolution = { topic: "Offline Analysis", answer: "Thinking...", steps: [] as string[] };
+             setSolution(partialSolution);
+             
+             const stream = offlineAIService.generateResponseStream([
+                { role: 'system', content: 'You are a science and math tutor. Solve the following question. Provide your answer in the following JSON format: {"topic": "Subject Name", "answer": "The final answer", "steps": ["Step 1...", "Step 2..."]}' },
+                { role: 'user', content: `Solve this question: ${extractedText}` }
+             ]);
+
+             let fullResponse = "";
+             for await (const chunk of stream) {
+                fullResponse += chunk;
+                try {
+                  // Try to find what looks like JSON or just show the text as steps
+                  const cleaned = fullResponse.replace(/```json|```/g, "").trim();
+                  if (cleaned.startsWith('{')) {
+                    const parsed = JSON.parse(cleaned + (cleaned.endsWith('}') ? '' : '}')); // Naive partial parse
+                    setSolution(prev => ({ ...prev, ...parsed }));
+                  } else {
+                    // If not JSON yet, treat text as steps
+                    setSolution(prev => ({ ...prev, steps: [fullResponse] }));
+                  }
+                } catch (e) {
+                  // Ignore parsing errors while streaming
+                }
+             }
+             
+             // Final cleanup and parse
+             const finalClean = fullResponse.replace(/```json|```/g, "").trim();
+             try {
+                result = JSON.parse(finalClean);
+             } catch (e) {
+                result = { topic: "Analysis Complete", answer: "Check steps above", steps: [fullResponse] };
+             }
+          }
+
           clearInterval(logInterval);
           setSolution(result);
           stopCamera();

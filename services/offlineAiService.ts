@@ -68,6 +68,29 @@ export class OfflineAIService {
     }
   }
 
+  async *generateResponseStream(messages: ChatMessage[]): AsyncGenerator<string> {
+    if (!this.engine) {
+      await this.init();
+    }
+
+    try {
+      const completion = await this.engine!.chat.completions.create({
+        messages: messages as any,
+        stream: true,
+      });
+
+      for await (const chunk of completion) {
+        const content = chunk.choices[0]?.delta?.content;
+        if (content) {
+          yield content;
+        }
+      }
+    } catch (error) {
+      console.error("Offline AI streaming error:", error);
+      yield "Offline AI service encountered an error. Please refresh or check your WebGPU support.";
+    }
+  }
+
   async isModelCached(): Promise<boolean> {
     return this.isLoaded;
   }

@@ -20,7 +20,7 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
         const parsed = JSON.parse(cached);
         return parsed.slice(-20); // Keep last 20
       }
-    } catch {}
+    } catch { }
     return [{
       id: 'welcome',
       role: 'model',
@@ -61,7 +61,7 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
       handleSendMessage(prompt);
       if (onClearTopic) onClearTopic();
     }
-  }, [initialTopic]);
+  }, [initialTopic, onClearTopic]);
 
   const [modelLoadingProgress, setModelLoadingProgress] = useState(0);
   const [isModelLoading, setIsModelLoading] = useState(false);
@@ -93,11 +93,11 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
           text: '',
           timestamp: Date.now()
         };
-        
+
         setMessages(prev => [...prev, placeholderMsg]);
 
         const stream = generateCoachResponseStream(
-          messages.map(m => ({ role: m.role, text: m.text })),
+          messages, // Pass full ChatMessage[] to satisfy type requirements
           text || "Process this audio",
           mode,
           language,
@@ -108,59 +108,73 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
         for await (const chunk of stream) {
           fullText += chunk;
           // Update the specific message in the list
-          setMessages(prev => prev.map(m => 
+          setMessages(prev => prev.map(m =>
             m.id === aiMsgId ? { ...m, text: fullText } : m
           ));
         }
         responseText = fullText;
       } else {
         const { offlineAIService } = await import('../services/offlineAiService');
-        
+
         try {
           // Check if supported AND fast enough, otherwise cloud fallback
           const isSupported = await offlineAIService.isWebGPUSupported();
-          
-          if (isSupported) {
-             if (!await offlineAIService.isModelCached()) {
-                setIsModelLoading(true);
-                offlineAIService.setOnProgress((p) => setModelLoadingProgress(p));
-                
-                // Add a timeout to initialization
-                const initPromise = offlineAIService.init();
-                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("OFFLINE_TIMEOUT")), 8000));
-                
-                await Promise.race([initPromise, timeoutPromise]);
-                setIsModelLoading(false);
-             }
-             
-             responseText = await offlineAIService.generateResponse([
-                { role: 'system', content: `You are an expert tutor. Mode: ${mode}. Language: ${language}` },
-                ...messages.map(m => ({ role: m.role === 'model' ? 'assistant' : 'user', content: m.text })),
-                { role: 'user', content: text }
-             ] as any);
 
-             const aiMsg: ChatMessage = {
-               id: (Date.now() + 1).toString(),
-               role: 'model',
-               text: responseText,
-               isAudio: true,
-               timestamp: Date.now()
-             };
-       
-             setMessages(prev => [...prev, aiMsg]);
+          if (isSupported) {
+            if (!await offlineAIService.isModelCached()) {
+              setIsModelLoading(true);
+              offlineAIService.setOnProgress((p) => setModelLoadingProgress(p));
+
+              // Add a timeout to initialization
+              const initPromise = offlineAIService.init();
+              const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("OFFLINE_TIMEOUT")), 8000));
+
+              await Promise.race([initPromise, timeoutPromise]);
+              setIsModelLoading(false);
+            }
+
+            // Create a placeholder message for the AI response
+            const aiMsgId = (Date.now() + 1).toString();
+            setMessages(prev => [...prev, {
+              id: aiMsgId,
+              role: 'model',
+              text: '',
+              isAudio: true,
+              timestamp: Date.now()
+            }]);
+
+            const historyForOffline = messages.map(m => ({
+              role: m.role === 'model' ? 'assistant' : 'user' as "assistant" | "user",
+              content: m.text
+            }));
+
+            const stream = offlineAIService.generateResponseStream([
+              { role: 'system', content: `You are an expert tutor. Mode: ${mode}. Language: ${language}` },
+              ...historyForOffline,
+              { role: 'user', content: text }
+            ]);
+
+            let fullText = "";
+            for await (const chunk of stream) {
+              fullText += chunk;
+              setMessages(prev => prev.map(m =>
+                m.id === aiMsgId ? { ...m, text: fullText } : m
+              ));
+            }
+            responseText = fullText;
           } else {
-             throw new Error("WEBGPU_NOT_SUPPORTED");
+            throw new Error("WEBGPU_NOT_SUPPORTED");
           }
         } catch (offlineErr: any) {
           console.warn("Offline failed, falling back to cloud:", offlineErr.message);
           setIsModelLoading(false);
-          
+
           // CRITICAL FALLBACK: Use Online Stream
           const aiMsgId = (Date.now() + 1).toString();
           setMessages(prev => [...prev, { id: aiMsgId, role: 'model', text: '', timestamp: Date.now() }]);
 
           const stream = generateCoachResponseStream(
-            messages.map(m => ({ role: m.role, text: m.text })),
+            messages, // Pass full ChatMessage[] to satisfy type requirements
             text || "Process this audio",
             mode,
             language,
@@ -170,7 +184,7 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
           let fullText = "";
           for await (const chunk of stream) {
             fullText += chunk;
-            setMessages(prev => prev.map(m => 
+            setMessages(prev => prev.map(m =>
               m.id === aiMsgId ? { ...m, text: fullText } : m
             ));
           }
@@ -183,7 +197,7 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
     } catch (error: any) {
       console.error(error);
       setIsModelLoading(false); // Stop loading on error
-      
+
       let errorText = "I'm having some trouble connecting to my brain. Please try again in a moment.";
       if (error.message === "WEBGPU_NOT_SUPPORTED") {
         errorText = "Your device doesn't support offline AI (WebGPU missing). Please use Online Mode instead.";
@@ -362,7 +376,7 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
                 </div>
               )}
             </div>
-            
+
             <span className="text-[10px] mt-1 mx-2 font-bold text-slate-400 uppercase tracking-tighter">
               {msg.role === 'user' ? 'Sent by You' : 'EduFree Assistant'}
             </span>
@@ -374,9 +388,9 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
               <div className="relative">
                 <Loader2 className={`animate-spin text-indigo-500`} size={24} />
                 {isModelLoading && (
-                   <div className="absolute inset-0 flex items-center justify-center text-[8px] font-bold">
+                  <div className="absolute inset-0 flex items-center justify-center text-[8px] font-bold">
                     {modelLoadingProgress}%
-                   </div>
+                  </div>
                 )}
               </div>
               <div className="flex flex-col">
@@ -387,11 +401,11 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
                   {isModelLoading ? `${modelLoadingProgress}% cached on-device` : "On-device neural processing"}
                 </span>
                 {isModelLoading && modelLoadingProgress === 0 && (
-                  <button 
+                  <button
                     onClick={() => {
-                        setIsModelLoading(false);
-                        setIsProcessing(false);
-                        alert("Taking too long? Please check your internet or try Online Mode.");
+                      setIsModelLoading(false);
+                      setIsProcessing(false);
+                      alert("Taking too long? Please check your internet or try Online Mode.");
                     }}
                     className="mt-1 text-[8px] text-indigo-500 font-bold uppercase hover:underline text-left"
                   >
