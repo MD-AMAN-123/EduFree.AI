@@ -7,7 +7,7 @@ export interface ChatMessage {
 
 export class OfflineAIService {
   private engine: webllm.MLCEngineInterface | null = null;
-  private modelId = "gemma-4-e2b-it-q4f16_1-MLC";
+  private modelId = import.meta.env.VITE_OFFLINE_MODEL || "gemma-2b-it-q4f16_1-MLC";
   private isLoaded = false;
   private onProgressCallback?: (progress: number) => void;
 

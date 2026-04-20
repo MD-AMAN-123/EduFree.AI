@@ -22,7 +22,7 @@ const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
 // Import offline service for transparent fallback
 import { offlineAIService } from "./offlineAiService";
 
-const DEFAULT_MODEL = "gemma-4-31b-it"; 
+const DEFAULT_MODEL = import.meta.env.VITE_AI_MODEL || "gemma-4-31b-it"; 
 const FALLBACK_MODEL = "gemini-1.5-flash"; 
 const PRO_MODEL = "gemma-4-31b-it"; 
 const VISION_MODEL = "gemini-1.5-pro"; 
@@ -241,7 +241,11 @@ export async function* generateCoachResponseStream(
             yield (await result.response).text();
         } catch (staticErr: any) {
             console.error("Critical AI Failure:", staticErr);
-            yield "I encountered another error while thinking. Testing your API key connectivity. Please verify your VITE_GEMINI_API_KEY in .env.local.";
+            if (!navigator.onLine) {
+                yield "It looks like you're offline. Please check your internet connection or use Offline Mode.";
+            } else {
+                yield "I encountered another error while thinking. Testing your API key connectivity. Please verify your VITE_GEMINI_API_KEY in .env.local.";
+            }
         }
     }
   }

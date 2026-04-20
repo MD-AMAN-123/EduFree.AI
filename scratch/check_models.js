@@ -3,14 +3,14 @@ import dotenv from "dotenv";
 dotenv.config({ path: '.env.local' });
 
 async function listAllModels() {
-    const apiKey = "AIzaSyB5GJEuKcW_urnTJUb1Q6VMRwvteFozGQU";
+    const apiKey = "";
     if (!apiKey) {
         console.error("No API key found!");
         return;
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    
+
     try {
         console.log("Fetching models...");
         // Use a generic test to see what works
