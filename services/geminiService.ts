@@ -23,7 +23,7 @@ const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
 import { offlineAIService } from "./offlineAiService";
 
 const DEFAULT_MODEL = import.meta.env.VITE_AI_MODEL || "gemma-4-31b-it"; 
-const FALLBACK_MODEL = "gemini-1.5-flash"; 
+const FALLBACK_MODEL = "gemma-4-26b-a4b-it"; 
 const PRO_MODEL = "gemma-4-31b-it"; 
 const VISION_MODEL = "gemini-1.5-pro"; 
 
@@ -163,8 +163,7 @@ export async function generateCoachResponse(
 
   try {
     const model = genAI.getGenerativeModel(
-      { model: DEFAULT_MODEL, systemInstruction: COACH_SYSTEM_INSTRUCTION(mode, language, bot) },
-      { apiVersion: "v1" }
+      { model: DEFAULT_MODEL, systemInstruction: COACH_SYSTEM_INSTRUCTION(mode, language, bot) }
     );
     const result = await model.startChat({ history: chatHistory }).sendMessage(parts);
     return { text: (await result.response).text() };
@@ -207,8 +206,7 @@ export async function* generateCoachResponseStream(
 
   try {
     const model = genAI.getGenerativeModel(
-      { model: DEFAULT_MODEL, systemInstruction: COACH_SYSTEM_INSTRUCTION(mode, language, bot) },
-      { apiVersion: 'v1' }
+      { model: DEFAULT_MODEL, systemInstruction: COACH_SYSTEM_INSTRUCTION(mode, language, bot) }
     );
 
     const chat = model.startChat({ history: chatHistory });
@@ -233,8 +231,7 @@ export async function* generateCoachResponseStream(
         console.warn("All streaming failed, attempting non-streaming v1...");
         try {
             const staticModel = genAI.getGenerativeModel(
-              { model: DEFAULT_MODEL, systemInstruction: COACH_SYSTEM_INSTRUCTION(mode, language, bot) },
-              { apiVersion: 'v1' }
+              { model: DEFAULT_MODEL, systemInstruction: COACH_SYSTEM_INSTRUCTION(mode, language, bot) }
             );
             const chat = staticModel.startChat({ history: chatHistory });
             const result = await chat.sendMessage(parts);
@@ -254,7 +251,7 @@ export async function* generateCoachResponseStream(
 export async function generateQuiz(topic: string, difficulty: string): Promise<QuizQuestion[]> {
   if (!genAI) return [];
   try {
-    const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL }, { apiVersion: 'v1' });
+    const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL });
     let res;
     try {
         res = await model.generateContent(QUIZ_PROMPT(topic, difficulty));
@@ -273,7 +270,7 @@ export async function generateQuiz(topic: string, difficulty: string): Promise<Q
 export async function generateLearningPath(subject: string): Promise<LearningNode[]> {
   if (!genAI || !navigator.onLine) return generateOfflineLearningPath(subject);
   try {
-    const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL }, { apiVersion: 'v1' });
+    const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL });
     const res = await model.generateContent(LEARNING_PATH_PROMPT(subject));
     const path = safeParse<LearningNode[]>(res.response.text(), []);
     return path.length > 0 ? path : generateOfflineLearningPath(subject);
@@ -294,7 +291,7 @@ function generateOfflineLearningPath(subject: string): LearningNode[] {
 export async function generateDashboardInsights(userName: string, stats: DashboardStats): Promise<AIInsight[]> {
   if (!genAI) return [];
   try {
-    const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL }, { apiVersion: 'v1' });
+    const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL });
     const res = await model.generateContent(DASHBOARD_INSIGHTS_PROMPT(userName, stats));
     return safeParse<AIInsight[]>(res.response.text(), [{ title: "Continue Learning", description: "Stay consistent!", type: "success" }]);
   } catch (error) {
@@ -306,7 +303,7 @@ export async function generateDashboardInsights(userName: string, stats: Dashboa
 export async function generateTeacherInsights(classDataJson: string): Promise<TeacherInsight[]> {
   if (!genAI) return [];
   try {
-    const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL }, { apiVersion: 'v1' });
+    const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL });
     const res = await model.generateContent(`Analyze class performance data: ${classDataJson}. Return JSON array of insights.`);
     return safeParse<TeacherInsight[]>(res.response.text(), []);
   } catch (error) {
@@ -318,7 +315,7 @@ export async function generateTeacherInsights(classDataJson: string): Promise<Te
 export async function solveQuestionFromImage(imageData: string): Promise<{ topic: string, answer: string, steps: string[] }> {
   if (!genAI) throw new Error("AI Service Unavailable");
   try {
-    const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL }, { apiVersion: 'v1' });
+    const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL });
     const prompt = `Identify the question in this image. Provide JSON: {topic, answer, steps}`;
     const result = await model.generateContent([prompt, { inlineData: { data: imageData, mimeType: "image/jpeg" } }]);
     return safeParse(result.response.text(), { topic: "General", answer: "Check image clarity", steps: ["Retry..."] });
@@ -331,7 +328,7 @@ export async function solveQuestionFromImage(imageData: string): Promise<{ topic
 export async function generateSupportResponse(history: any[], currentMessage: string): Promise<string> {
   if (!genAI) return "Support offline.";
   try {
-    const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL }, { apiVersion: 'v1' });
+    const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL });
     const res = await model.generateContent(currentMessage);
     return res.response.text();
   } catch (error) {
@@ -342,7 +339,7 @@ export async function generateSupportResponse(history: any[], currentMessage: st
 export async function* generateSupportResponseStream(history: any[], currentMessage: string): AsyncGenerator<string> {
   if (!genAI) { yield "Support offline."; return; }
   try {
-    const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL }, { apiVersion: 'v1' });
+    const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL });
     const chat = model.startChat({ history: [] });
     const result = await chat.sendMessageStream(currentMessage);
     for await (const chunk of result.stream) { yield chunk.text(); }
@@ -352,7 +349,7 @@ export async function* generateSupportResponseStream(history: any[], currentMess
 export async function generateVisualAid(topic: string): Promise<string> {
   if (!genAI) return "Visual service offline.";
   try {
-    const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL }, { apiVersion: 'v1' });
+    const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL });
     const res = await model.generateContent(`Explain ${topic} visually with markdown.`);
     return res.response.text();
   } catch (error) { return "Visual aid error."; }
@@ -361,7 +358,7 @@ export async function generateVisualAid(topic: string): Promise<string> {
 export const checkOriginality = async (text: string): Promise<{ score: number, analysis: string }> => {
   if (!genAI) return { score: 100, analysis: "Local check only." };
   try {
-    const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL }, { apiVersion: 'v1' });
+    const model = genAI.getGenerativeModel({ model: DEFAULT_MODEL });
     const res = await model.generateContent(`Analyze for AI: ${text}. Return JSON: {score, analysis}`);
     return safeParse(res.response.text(), { score: 70, analysis: "Likely original." });
   } catch (error) { return { score: 50, analysis: "Check failed." }; }
