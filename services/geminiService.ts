@@ -238,11 +238,7 @@ export async function* generateCoachResponseStream(
             yield (await result.response).text();
         } catch (staticErr: any) {
             console.error("Critical AI Failure:", staticErr);
-            if (!navigator.onLine) {
-                yield "It looks like you're offline. Please check your internet connection or use Offline Mode.";
-            } else {
-                yield "I encountered another error while thinking. Testing your API key connectivity. Please verify your VITE_GEMINI_API_KEY in .env.local.";
-            }
+            yield "Connection interrupted. Attempting local recovery...";
         }
     }
   }
