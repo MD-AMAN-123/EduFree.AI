@@ -18,14 +18,15 @@ export class OfflineAIService {
     this.onProgressCallback = callback;
   }
 
-  async isWebGPUSupported(): Promise<boolean> {
+  async isWebGPUSupported(): Promise<{ supported: boolean; reason?: string }> {
     const nav = navigator as any;
-    if (!nav.gpu) return false;
+    if (!nav.gpu) return { supported: false, reason: "Your browser does not support WebGPU. Try using the latest version of Chrome or Edge." };
     try {
       const adapter = await nav.gpu.requestAdapter();
-      return !!adapter;
-    } catch {
-      return false;
+      if (!adapter) return { supported: false, reason: "WebGPU is supported but no compatible graphics adapter was found." };
+      return { supported: true };
+    } catch (e: any) {
+      return { supported: false, reason: `WebGPU initialization failed: ${e.message}` };
     }
   }
 
@@ -33,13 +34,14 @@ export class OfflineAIService {
     if (this.isLoaded || this.isInitializing) return;
     this.isInitializing = true;
 
-    const isSupported = await this.isWebGPUSupported();
-    if (!isSupported) {
+    const gpuStatus = await this.isWebGPUSupported();
+    if (!gpuStatus.supported) {
       this.isInitializing = false;
-      throw new Error("WEBGPU_NOT_SUPPORTED");
+      throw new Error(gpuStatus.reason || "WEBGPU_NOT_SUPPORTED");
     }
 
     try {
+      console.log("Starting Web-LLM engine with model:", this.modelId);
       this.engine = await webllm.CreateMLCEngine(this.modelId, {
         initProgressCallback: (report) => {
           if (this.onProgressCallback) {
@@ -90,9 +92,12 @@ export class OfflineAIService {
           yield content;
         }
       }
-    } catch (error) {
-      console.error("Offline AI streaming error:", error);
-      yield "Offline AI service encountered an error. Please refresh or check your WebGPU support.";
+    } catch (error: any) {
+      console.error("CRITICAL: Offline AI streaming error:", error);
+      const msg = error?.message || "";
+      if (msg.includes("out of memory")) yield "Offline AI ran out of memory. Try closing other tabs.";
+      else if (msg.includes("device lost")) yield "Graphics device lost connection. Please refresh the page.";
+      else yield `Offline AI error: ${msg || "Unknown error"}. Please check your browser's WebGPU support.`;
     }
   }
 

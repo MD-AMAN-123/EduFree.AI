@@ -151,8 +151,8 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
         const { offlineAIService } = await import('../services/offlineAiService');
 
         try {
-          const isSupported = await offlineAIService.isWebGPUSupported();
-          if (!isSupported) throw new Error("WEBGPU_NOT_SUPPORTED");
+          const gpuStatus = await offlineAIService.isWebGPUSupported();
+          if (!gpuStatus.supported) throw new Error(gpuStatus.reason || "WEBGPU_NOT_SUPPORTED");
 
           if (!await offlineAIService.isModelCached() || engineStatus !== 'READY') {
             setIsModelLoading(true);
@@ -211,7 +211,7 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
       console.error(error);
       setIsModelLoading(false); // Stop loading on error
 
-      let errorText = "I'm having some trouble connecting to my brain. Please try again in a moment.";
+      let errorText = error.message || "I'm having some trouble connecting to my brain. Please try again in a moment.";
       if (error.message === "WEBGPU_NOT_SUPPORTED") {
         errorText = "Your device doesn't support offline AI (WebGPU missing). Please use Online Mode instead.";
       }
