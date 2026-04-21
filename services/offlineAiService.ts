@@ -9,6 +9,7 @@ export class OfflineAIService {
   private engine: webllm.MLCEngineInterface | null = null;
   private modelId = import.meta.env.VITE_OFFLINE_MODEL || "gemma-2b-it-q4f16_1-MLC";
   private isLoaded = false;
+  private isInitializing = false;
   private onProgressCallback?: (progress: number) => void;
 
   constructor() { }
@@ -29,10 +30,12 @@ export class OfflineAIService {
   }
 
   async init() {
-    if (this.isLoaded) return;
+    if (this.isLoaded || this.isInitializing) return;
+    this.isInitializing = true;
 
     const isSupported = await this.isWebGPUSupported();
     if (!isSupported) {
+      this.isInitializing = false;
       throw new Error("WEBGPU_NOT_SUPPORTED");
     }
 
@@ -46,7 +49,9 @@ export class OfflineAIService {
         },
       });
       this.isLoaded = true;
+      this.isInitializing = false;
     } catch (error) {
+      this.isInitializing = false;
       console.error("Failed to initialize Web-LLM:", error);
       throw error;
     }
@@ -92,6 +97,12 @@ export class OfflineAIService {
   }
 
   async isModelCached(): Promise<boolean> {
+    // If it's already loaded in memory, it's definitely cached
+    if (this.isLoaded) return true;
+    
+    // We can check if the model exists in the MLC cache via IndexedDB
+    // For now, we'll return the in-memory status primarily, 
+    // but in a production app we'd check the storage.
     return this.isLoaded;
   }
 }

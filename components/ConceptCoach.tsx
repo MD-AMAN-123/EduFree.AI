@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Mic, Play, Square, Loader2, Volume2, Globe, Image as ImageIcon } from 'lucide-react';
+import { Send, Mic, Play, Square, Loader2, Volume2, Globe, Image as ImageIcon, BrainCircuit } from 'lucide-react';
 import { CoachMode, ChatMessage, Language } from '../types';
 import { generateCoachResponse, generateCoachResponseStream, blobToBase64, generateVisualAid } from '../services/geminiService';
 import { getTextDirection } from '../services/i18nService';
@@ -72,9 +72,33 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
       const { offlineAIService } = await import('../services/offlineAiService');
       const cached = await offlineAIService.isModelCached();
       if (cached) setEngineStatus('READY');
+      else setEngineStatus('IDLE');
     };
+
+    // Check every few seconds or on focus
     checkStatus();
+    const interval = setInterval(checkStatus, 5000);
+    return () => clearInterval(interval);
   }, []);
+
+  const handleDownloadModel = async () => {
+    if (engineStatus !== 'IDLE') return;
+
+    try {
+      setIsModelLoading(true);
+      setEngineStatus('LOADING');
+      const { offlineAIService } = await import('../services/offlineAiService');
+      offlineAIService.setOnProgress((p) => setModelLoadingProgress(p));
+      await offlineAIService.init();
+      setEngineStatus('READY');
+    } catch (error: any) {
+      console.error("Failed to download model:", error);
+      alert("Download failed. Please check your internet connection.");
+      setEngineStatus('IDLE');
+    } finally {
+      setIsModelLoading(false);
+    }
+  };
 
   const handleSendMessage = async (text: string, audioBase64?: string) => {
     if (!text && !audioBase64) return;
@@ -299,6 +323,18 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
     let textColor = "text-green-600 dark:text-green-400";
     let bgColor = "bg-green-50 dark:bg-green-900/20";
     let borderColor = "border-green-100 dark:border-green-800/30";
+
+    if (navigator.onLine && engineStatus === 'IDLE') {
+      return (
+        <button
+          onClick={handleDownloadModel}
+          className="flex items-center gap-1.5 px-2 py-0.5 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 rounded-md text-[10px] font-bold border border-indigo-100 dark:border-indigo-800/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-colors"
+        >
+          <BrainCircuit className="w-3 h-3 animate-pulse" />
+          DOWNLOAD OFFLINE BRAIN (Gemma 4)
+        </button>
+      );
+    }
 
     if (engineStatus === 'LOADING' || isModelLoading) {
       statusText = `GEMMA 4 LOADING (${modelLoadingProgress}%)`;
