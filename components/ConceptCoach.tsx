@@ -318,20 +318,20 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
   };
 
   const getSyncStatus = () => {
-    let statusText = "GEMMA 4 OFFLINE ACTIVE";
-    let statusColor = "bg-green-500";
-    let textColor = "text-green-600 dark:text-green-400";
-    let bgColor = "bg-green-50 dark:bg-green-900/20";
-    let borderColor = "border-green-100 dark:border-green-800/30";
+    let statusText = engineStatus === 'READY' ? "GEMMA 4 OFFLINE ACTIVE" : "OFFLINE BRAIN MISSING";
+    let statusColor = engineStatus === 'READY' ? "bg-green-500" : "bg-slate-400";
+    let textColor = engineStatus === 'READY' ? "text-green-600 dark:text-green-400" : "text-slate-500 dark:text-slate-400";
+    let bgColor = engineStatus === 'READY' ? "bg-green-50 dark:bg-green-900/20" : "bg-slate-50 dark:bg-slate-900/20";
+    let borderColor = engineStatus === 'READY' ? "border-green-100 dark:border-green-800/30" : "border-slate-200 dark:border-slate-800/30";
 
     if (navigator.onLine && engineStatus === 'IDLE') {
       return (
         <button
           onClick={handleDownloadModel}
-          className="flex items-center gap-1.5 px-2 py-0.5 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 rounded-md text-[10px] font-bold border border-indigo-100 dark:border-indigo-800/30 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1 bg-indigo-600 text-white rounded-md text-[11px] font-black border border-indigo-500 hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/20 transform active:scale-95"
         >
-          <BrainCircuit className="w-3 h-3 animate-pulse" />
-          DOWNLOAD OFFLINE BRAIN (Gemma 4)
+          <BrainCircuit className="w-3.5 h-3.5 animate-pulse" />
+          ACTIVATE GEMMA 4 OFFLINE
         </button>
       );
     }
