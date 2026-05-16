@@ -84,7 +84,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 relative overflow-hidden font-sans selection:bg-indigo-500/30">
+    <div className="h-screen bg-slate-950 flex items-center justify-center p-4 relative overflow-hidden font-sans selection:bg-indigo-500/30 overscroll-none">
       {/* Insane Animated Background Blobs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-25%] left-[-15%] w-[80%] h-[80%] rounded-full bg-indigo-600/20 blur-[150px] animate-[pulse_8s_infinite]"></div>
@@ -92,7 +92,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
         <div className="absolute top-[40%] left-[20%] w-[30%] h-[30%] rounded-full bg-blue-500/10 blur-[100px] animate-bounce duration-[10s]"></div>
       </div>
 
-      <div className="max-w-6xl w-full grid md:grid-cols-2 bg-slate-900/40 backdrop-blur-3xl rounded-[3.5rem] border border-white/10 shadow-[0_32px_128px_-16px_rgba(0,0,0,0.7)] overflow-hidden relative z-10 scale-in-center">
+      <div className="max-w-6xl w-full max-h-[min(900px,95vh)] grid md:grid-cols-2 bg-slate-900/40 backdrop-blur-3xl rounded-[3.5rem] border border-white/10 shadow-[0_32px_128px_-16px_rgba(0,0,0,0.7)] overflow-hidden relative z-10 scale-in-center">
         
         {/* Left Side: immersive Brand Experience */}
         <div className="hidden md:flex flex-col items-center justify-center p-20 bg-gradient-to-br from-indigo-600 to-indigo-900 relative group">
@@ -139,7 +139,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
         </div>
 
         {/* Right Side: High-End Auth Form */}
-        <div className="p-12 md:p-20 flex flex-col justify-center relative">
+        <div className="p-12 md:p-20 flex flex-col justify-center relative overflow-y-auto max-h-full scrollbar-hide">
           <div className="flex items-center justify-between mb-12">
             <div>
               <h2 className="text-4xl font-black text-white mb-2 italic">
@@ -158,12 +158,13 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
           <form onSubmit={handleSubmit} className="space-y-8">
             {!isLogin && (
               <div className="space-y-3">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1">Identity</label>
+                <label htmlFor="full-name" className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1">Identity</label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
                     <UserIcon size={20} className="text-slate-600 group-focus-within:text-indigo-500 transition-colors" />
                   </div>
                   <input 
+                    id="full-name"
                     type="text" 
                     required 
                     placeholder="Full Name"
@@ -176,12 +177,13 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
             )}
 
             <div className="space-y-3">
-              <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1">Email Terminal</label>
+              <label htmlFor="email-terminal" className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1">Email Terminal</label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
                   <Mail size={20} className="text-slate-600 group-focus-within:text-indigo-500 transition-colors" />
                 </div>
                 <input 
+                  id="email-terminal"
                   type="email" 
                   required 
                   placeholder="name@example.com"
@@ -194,7 +196,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
 
             <div className="space-y-3">
               <div className="flex justify-between items-center px-1">
-                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Secure Vault</label>
+                 <label htmlFor="password-vault" className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Secure Vault</label>
                  <button type="button" className="text-[10px] font-bold text-indigo-500 hover:underline">RECOVER</button>
               </div>
               <div className="relative group">
@@ -202,6 +204,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
                   <Lock size={20} className="text-slate-600 group-focus-within:text-indigo-500 transition-colors" />
                 </div>
                 <input 
+                  id="password-vault"
                   type="password" 
                   required 
                   placeholder="••••••••"

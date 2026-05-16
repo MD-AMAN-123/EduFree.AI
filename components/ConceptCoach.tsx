@@ -367,8 +367,10 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
           </div>
         </div>
 
-        <div className="flex gap-2 text-sm">
+        <div className="flex gap-2 text-sm items-center">
+          <label htmlFor="language-select" className="sr-only">Select Language</label>
           <select
+            id="language-select"
             value={language}
             onChange={(e) => setLanguage(e.target.value as Language)}
             className="border dark:border-slate-700 rounded-lg px-3 py-1.5 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-indigo-500"
@@ -482,17 +484,21 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
           {/* Recording Button */}
           <button
             onClick={isRecording ? stopRecording : startRecording}
+            title={isRecording ? "Stop recording" : "Start voice input"}
             className={`absolute right-14 p-2 rounded-full transition-colors ${isRecording ? 'text-red-500 hover:bg-red-50 animate-pulse' : 'text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400'
               }`}
           >
+            <span className="sr-only">{isRecording ? "Stop recording" : "Start voice input"}</span>
             {isRecording ? <Square size={20} fill="currentColor" /> : <Mic size={20} />}
           </button>
 
           <button
             onClick={() => handleSendMessage(inputText)}
             disabled={(!inputText.trim() && !isRecording) || isProcessing || isGeneratingImage}
+            title="Send message"
             className="bg-indigo-600 text-white p-3 rounded-full hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg hover:shadow-indigo-200 dark:hover:shadow-none"
           >
+            <span className="sr-only">Send message</span>
             <Send size={20} />
           </button>
         </div>
