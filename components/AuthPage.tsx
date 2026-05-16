@@ -92,62 +92,62 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
         <div className="absolute top-[40%] left-[20%] w-[30%] h-[30%] rounded-full bg-blue-500/10 blur-[100px] animate-bounce duration-[10s]"></div>
       </div>
 
-      <div className="max-w-6xl w-full max-h-[min(900px,95vh)] grid md:grid-cols-2 bg-slate-900/40 backdrop-blur-3xl rounded-[3.5rem] border border-white/10 shadow-[0_32px_128px_-16px_rgba(0,0,0,0.7)] overflow-hidden relative z-10 scale-in-center">
-        
+      <div className="max-w-6xl w-full max-h-[min(850px,92vh)] grid md:grid-cols-2 bg-slate-900/40 backdrop-blur-3xl rounded-[3rem] border border-white/10 shadow-[0_32px_128px_-16px_rgba(0,0,0,0.7)] overflow-hidden relative z-10 scale-in-center">
+
         {/* Left Side: immersive Brand Experience */}
-        <div className="hidden md:flex flex-col items-center justify-center p-20 bg-gradient-to-br from-indigo-600 to-indigo-900 relative group">
+        <div className="hidden md:flex flex-col items-center justify-center p-8 lg:p-12 bg-gradient-to-br from-indigo-600 to-indigo-900 relative group">
           <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px' }}></div>
-          
+
           <div className="relative z-10 text-center">
             {/* Floating Icons Decor */}
             <div className="absolute -top-12 -left-12 p-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 rotate-12 animate-float">
-               <GraduationCap className="text-indigo-200" size={32} />
+              <GraduationCap className="text-indigo-200" size={32} />
             </div>
             <div className="absolute -bottom-12 -right-12 p-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 -rotate-12 animate-float-delayed">
-               <Globe className="text-indigo-200" size={32} />
+              <Globe className="text-indigo-200" size={32} />
             </div>
 
-            <div className="inline-flex p-8 bg-white/10 backdrop-blur-2xl rounded-[2.5rem] border border-white/20 mb-8 shadow-2xl transform group-hover:scale-110 transition-transform duration-700">
-              <BrainCircuit size={80} className="text-white animate-pulse" />
+            <div className="inline-flex p-4 bg-white/10 backdrop-blur-2xl rounded-[2rem] border border-white/20 mb-4 shadow-2xl transform group-hover:scale-110 transition-transform duration-700">
+              <BrainCircuit size={48} className="text-white animate-pulse" />
             </div>
-            
-            <h1 className="text-6xl font-black text-white mb-6 tracking-tighter drop-shadow-2xl">
+
+            <h1 className="text-4xl font-black text-white mb-3 tracking-tighter drop-shadow-2xl">
               EduFree<span className="text-indigo-300">.AI</span>
             </h1>
-            <p className="text-indigo-100 text-xl font-bold leading-relaxed max-w-sm mx-auto opacity-80 mb-12">
+            <p className="text-indigo-100 text-base font-bold leading-relaxed max-w-sm mx-auto opacity-80 mb-6">
               The world's first AI-powered learning ecosystem optimized for speed and accessibility.
             </p>
-            
-            <div className="grid grid-cols-1 gap-4 text-left">
-               {[
-                 { icon: Zap, text: "Ultra-Fast Reasoning", sub: "Latency optimized models" },
-                 { icon: ShieldCheck, text: "Private & Secure", sub: "Zero-knowledge encryption" },
-                 { icon: Star, text: "Premium Content", sub: "Curated by top educators" }
-               ].map((item, idx) => (
-                 <div key={idx} className="flex items-center gap-4 p-4 rounded-3xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/20 transition-all cursor-default group/item">
-                   <div className="p-3 bg-white/10 rounded-2xl text-indigo-300 group-hover/item:scale-110 transition-transform">
-                      <item.icon size={22} />
-                   </div>
-                   <div>
-                      <p className="text-white font-bold text-sm tracking-wide">{item.text}</p>
-                      <p className="text-indigo-200/50 text-[10px] font-bold uppercase tracking-widest">{item.sub}</p>
-                   </div>
-                 </div>
-               ))}
+
+            <div className="grid grid-cols-1 gap-2 text-left">
+              {[
+                { icon: Zap, text: "Ultra-Fast Reasoning", sub: "Latency optimized models" },
+                { icon: ShieldCheck, text: "Private & Secure", sub: "Zero-knowledge encryption" },
+                { icon: Star, text: "Premium Content", sub: "Curated by top educators" }
+              ].map((item, idx) => (
+                <div key={idx} className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/20 transition-all cursor-default group/item">
+                  <div className="p-3 bg-white/10 rounded-2xl text-indigo-300 group-hover/item:scale-110 transition-transform">
+                    <item.icon size={22} />
+                  </div>
+                  <div>
+                    <p className="text-white font-bold text-sm tracking-wide">{item.text}</p>
+                    <p className="text-indigo-200/50 text-[10px] font-bold uppercase tracking-widest">{item.sub}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
 
         {/* Right Side: High-End Auth Form */}
-        <div className="p-12 md:p-20 flex flex-col justify-center relative overflow-y-auto max-h-full scrollbar-hide">
-          <div className="flex items-center justify-between mb-12">
+        <div className="p-8 md:p-12 flex flex-col justify-center relative overflow-y-auto max-h-full scrollbar-hide">
+          <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-4xl font-black text-white mb-2 italic">
+              <h2 className="text-3xl font-black text-white mb-1 italic">
                 {isLogin ? 'Hello Again!' : 'Join the Elite'}
               </h2>
               <div className="h-1.5 w-12 bg-indigo-600 rounded-full"></div>
             </div>
-            <button 
+            <button
               onClick={() => setIsLogin(!isLogin)}
               className="px-6 py-2 rounded-full border border-indigo-500/30 text-xs font-black uppercase tracking-widest text-indigo-400 hover:bg-indigo-500 hover:text-white transition-all active:scale-95"
             >
@@ -155,7 +155,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-8">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
               <div className="space-y-3">
                 <label htmlFor="full-name" className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1">Identity</label>
@@ -163,14 +163,14 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
                   <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
                     <UserIcon size={20} className="text-slate-600 group-focus-within:text-indigo-500 transition-colors" />
                   </div>
-                  <input 
+                  <input
                     id="full-name"
-                    type="text" 
-                    required 
+                    type="text"
+                    required
                     placeholder="Full Name"
-                    className="w-full pl-14 pr-6 py-5 bg-slate-800/40 border border-white/5 rounded-3xl focus:border-indigo-500 focus:ring-8 focus:ring-indigo-500/5 outline-none transition-all text-white placeholder:text-slate-700 font-bold"
+                    className="w-full pl-14 pr-6 py-3.5 bg-slate-800/40 border border-white/5 rounded-2xl focus:border-indigo-500 focus:ring-8 focus:ring-indigo-500/5 outline-none transition-all text-white placeholder:text-slate-700 font-bold"
                     value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   />
                 </div>
               </div>
@@ -182,44 +182,44 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
                 <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
                   <Mail size={20} className="text-slate-600 group-focus-within:text-indigo-500 transition-colors" />
                 </div>
-                <input 
+                <input
                   id="email-terminal"
-                  type="email" 
-                  required 
+                  type="email"
+                  required
                   placeholder="name@example.com"
-                  className="w-full pl-14 pr-6 py-5 bg-slate-800/40 border border-white/5 rounded-3xl focus:border-indigo-500 focus:ring-8 focus:ring-indigo-500/5 outline-none transition-all text-white placeholder:text-slate-700 font-bold"
+                  className="w-full pl-14 pr-6 py-3.5 bg-slate-800/40 border border-white/5 rounded-2xl focus:border-indigo-500 focus:ring-8 focus:ring-indigo-500/5 outline-none transition-all text-white placeholder:text-slate-700 font-bold"
                   value={formData.email}
-                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 />
               </div>
             </div>
 
             <div className="space-y-3">
               <div className="flex justify-between items-center px-1">
-                 <label htmlFor="password-vault" className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Secure Vault</label>
-                 <button type="button" className="text-[10px] font-bold text-indigo-500 hover:underline">RECOVER</button>
+                <label htmlFor="password-vault" className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Secure Vault</label>
+                <button type="button" className="text-[10px] font-bold text-indigo-500 hover:underline">RECOVER</button>
               </div>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
                   <Lock size={20} className="text-slate-600 group-focus-within:text-indigo-500 transition-colors" />
                 </div>
-                <input 
+                <input
                   id="password-vault"
-                  type="password" 
-                  required 
+                  type="password"
+                  required
                   placeholder="••••••••"
-                  className="w-full pl-14 pr-6 py-5 bg-slate-800/40 border border-white/5 rounded-3xl focus:border-indigo-500 focus:ring-8 focus:ring-indigo-500/5 outline-none transition-all text-white placeholder:text-slate-700 font-bold"
+                  className="w-full pl-14 pr-6 py-3.5 bg-slate-800/40 border border-white/5 rounded-2xl focus:border-indigo-500 focus:ring-8 focus:ring-indigo-500/5 outline-none transition-all text-white placeholder:text-slate-700 font-bold"
                   value={formData.password}
-                  onChange={(e) => setFormData({...formData, password: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 />
               </div>
             </div>
 
             <div className="pt-4 space-y-4">
-               <button
+              <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-5 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-[2rem] shadow-2xl shadow-indigo-900/50 transition-all flex items-center justify-center gap-4 group active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+                className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-2xl shadow-2xl shadow-indigo-900/50 transition-all flex items-center justify-center gap-4 group active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
               >
                 {isLoading ? <Loader2 size={24} className="animate-spin" /> : (
                   <>
@@ -232,22 +232,22 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
               <button
                 type="button"
                 onClick={handleGuestLogin}
-                className="w-full py-5 bg-transparent border-2 border-slate-800 text-slate-400 font-black rounded-[2rem] hover:bg-slate-800 hover:text-white transition-all text-xs tracking-[0.2em] uppercase"
+                className="w-full py-3.5 bg-transparent border-2 border-slate-800 text-slate-400 font-black rounded-2xl hover:bg-slate-800 hover:text-white transition-all text-xs tracking-[0.2em] uppercase"
               >
                 Continue as Guest
               </button>
             </div>
           </form>
 
-          <div className="mt-16 text-center">
-             <div className="flex items-center gap-4 mb-6">
-                <div className="h-px bg-slate-800 flex-1"></div>
-                <span className="text-[10px] font-black text-slate-600 uppercase tracking-[0.3em]">Verified Secure</span>
-                <div className="h-px bg-slate-800 flex-1"></div>
-             </div>
-             <p className="text-[10px] text-slate-600 font-bold leading-relaxed px-10">
-               By accessing this portal, you acknowledge our global security protocols and privacy standards.
-             </p>
+          <div className="mt-6 text-center">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="h-px bg-slate-800 flex-1"></div>
+              <span className="text-[10px] font-black text-slate-600 uppercase tracking-[0.3em]">Verified Secure</span>
+              <div className="h-px bg-slate-800 flex-1"></div>
+            </div>
+            <p className="text-[10px] text-slate-600 font-bold leading-relaxed px-10">
+              By accessing this portal, you acknowledge our global security protocols and privacy standards.
+            </p>
           </div>
         </div>
       </div>
