@@ -24,7 +24,7 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
     return [{
       id: 'welcome',
       role: 'model',
-      text: 'Hello! I am EduFree, now powered by Gemma 4. I am here to tutor you with advanced reasoning even without internet. What should we learn today?',
+      text: 'Hello! I am EduFree, now upgraded with the latest Gemini 3.1 Pro and Gemma 4. I am here to tutor you with advanced reasoning even without internet. What should we learn today?',
       timestamp: Date.now()
     }];
   };
@@ -373,6 +373,7 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
             id="language-select"
             value={language}
             onChange={(e) => setLanguage(e.target.value as Language)}
+            aria-label="Select Language"
             className="border dark:border-slate-700 rounded-lg px-3 py-1.5 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-indigo-500"
           >
             {Object.values(Language).map(l => (
@@ -485,6 +486,7 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
           <button
             onClick={isRecording ? stopRecording : startRecording}
             title={isRecording ? "Stop recording" : "Start voice input"}
+            aria-label={isRecording ? "Stop recording" : "Start voice input"}
             className={`absolute right-14 p-2 rounded-full transition-colors ${isRecording ? 'text-red-500 hover:bg-red-50 animate-pulse' : 'text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400'
               }`}
           >
@@ -496,6 +498,7 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
             onClick={() => handleSendMessage(inputText)}
             disabled={(!inputText.trim() && !isRecording) || isProcessing || isGeneratingImage}
             title="Send message"
+            aria-label="Send message"
             className="bg-indigo-600 text-white p-3 rounded-full hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg hover:shadow-indigo-200 dark:hover:shadow-none"
           >
             <span className="sr-only">Send message</span>

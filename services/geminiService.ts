@@ -22,10 +22,10 @@ const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
 // Import offline service for transparent fallback
 import { offlineAIService } from "./offlineAiService";
 
-const DEFAULT_MODEL = import.meta.env.VITE_AI_MODEL || "gemini-1.5-flash"; 
-const FALLBACK_MODEL = "gemini-1.5-flash"; 
-const PRO_MODEL = "gemini-1.5-pro"; 
-const VISION_MODEL = "gemini-1.5-flash"; 
+const DEFAULT_MODEL = import.meta.env.VITE_AI_MODEL || "gemini-3.1-flash"; 
+const FALLBACK_MODEL = "gemini-3.0-flash"; 
+const PRO_MODEL = "gemini-3.1-pro"; 
+const VISION_MODEL = "gemini-3.1-flash"; 
 
 /* ===============================
    PROMPTS & SYSTEM INSTRUCTIONS

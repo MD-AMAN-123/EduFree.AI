@@ -168,6 +168,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
                     type="text"
                     required
                     placeholder="Full Name"
+                    aria-label="Full Name"
                     className="w-full pl-14 pr-6 py-3.5 bg-slate-800/40 border border-white/5 rounded-2xl focus:border-indigo-500 focus:ring-8 focus:ring-indigo-500/5 outline-none transition-all text-white placeholder:text-slate-700 font-bold"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -187,6 +188,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
                   type="email"
                   required
                   placeholder="name@example.com"
+                  aria-label="Email Address"
                   className="w-full pl-14 pr-6 py-3.5 bg-slate-800/40 border border-white/5 rounded-2xl focus:border-indigo-500 focus:ring-8 focus:ring-indigo-500/5 outline-none transition-all text-white placeholder:text-slate-700 font-bold"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -208,6 +210,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
                   type="password"
                   required
                   placeholder="••••••••"
+                  aria-label="Password"
                   className="w-full pl-14 pr-6 py-3.5 bg-slate-800/40 border border-white/5 rounded-2xl focus:border-indigo-500 focus:ring-8 focus:ring-indigo-500/5 outline-none transition-all text-white placeholder:text-slate-700 font-bold"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
