@@ -88,7 +88,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
       {/* Insane Animated Background Blobs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-25%] left-[-15%] w-[80%] h-[80%] rounded-full bg-indigo-600/20 blur-[150px] animate-[pulse_8s_infinite]"></div>
-        <div className="absolute bottom-[-25%] right-[-15%] w-[80%] h-[80%] rounded-full bg-purple-600/20 blur-[150px] animate-[pulse_8s_infinite]" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute bottom-[-25%] right-[-15%] w-[80%] h-[80%] rounded-full bg-purple-600/20 blur-[150px] animate-[pulse_8s_infinite] animate-delay-2s"></div>
         <div className="absolute top-[40%] left-[20%] w-[30%] h-[30%] rounded-full bg-blue-500/10 blur-[100px] animate-bounce duration-[10s]"></div>
       </div>
 
@@ -96,7 +96,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
 
         {/* Left Side: immersive Brand Experience */}
         <div className="hidden md:flex flex-col items-center justify-center p-8 lg:p-12 bg-gradient-to-br from-indigo-600 to-indigo-900 relative group">
-          <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px' }}></div>
+          <div className="absolute inset-0 opacity-10 pointer-events-none radial-dots"></div>
 
           <div className="relative z-10 text-center">
             {/* Floating Icons Decor */}
@@ -271,6 +271,8 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
           0% { transform: scale(0.9); opacity: 0; }
           100% { transform: scale(1); opacity: 1; }
         }
+        .animate-delay-2s { animation-delay: 2s; }
+        .radial-dots { background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 32px 32px; }
       `}</style>
     </div>
   );

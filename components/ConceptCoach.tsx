@@ -115,73 +115,30 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
     setInputText('');
 
     try {
+      // ── HYBRID AI LOGIC ──────────────────────────────────────────
       let responseText = "";
+      const isOnline = navigator.onLine;
 
-      // Smart Hybrid Toggle
-      if (navigator.onLine) {
-        // Create a placeholder message for the AI response
-        const aiMsgId = (Date.now() + 1).toString();
-        const placeholderMsg: ChatMessage = {
-          id: aiMsgId,
-          role: 'model',
-          text: '',
-          timestamp: Date.now()
-        };
-
-        setMessages(prev => [...prev, placeholderMsg]);
-
-        const stream = generateCoachResponseStream(
-          messages,
-          text || "Process this audio",
-          mode,
-          language,
-          audioBase64
-        );
-
-        let fullText = "";
-        for await (const chunk of stream) {
-          fullText += chunk;
-          setMessages(prev => prev.map(m =>
-            m.id === aiMsgId ? { ...m, text: fullText } : m
-          ));
-        }
-        responseText = fullText;
-      } else {
-        // ENFORCED OFFLINE MODE
-        const { offlineAIService } = await import('../services/offlineAiService');
-
+      if (isOnline) {
+        // ONLINE MODE: Use Gemini 3.1
         try {
-          const gpuStatus = await offlineAIService.isWebGPUSupported();
-          if (!gpuStatus.supported) throw new Error(gpuStatus.reason || "WEBGPU_NOT_SUPPORTED");
-
-          if (!await offlineAIService.isModelCached() || engineStatus !== 'READY') {
-            setIsModelLoading(true);
-            setEngineStatus('LOADING');
-            offlineAIService.setOnProgress((p) => setModelLoadingProgress(p));
-            await offlineAIService.init();
-            setIsModelLoading(false);
-            setEngineStatus('READY');
-          }
-
           const aiMsgId = (Date.now() + 1).toString();
-          setMessages(prev => [...prev, {
+          const placeholderMsg: ChatMessage = {
             id: aiMsgId,
             role: 'model',
             text: '',
-            isAudio: true,
             timestamp: Date.now()
-          }]);
+          };
 
-          const historyForOffline = messages.map(m => ({
-            role: m.role === 'model' ? 'assistant' : 'user' as "assistant" | "user",
-            content: m.text
-          }));
+          setMessages(prev => [...prev, placeholderMsg]);
 
-          const stream = offlineAIService.generateResponseStream([
-            { role: 'system', content: `You are an expert tutor. Mode: ${mode}. Language: ${language}` },
-            ...historyForOffline,
-            { role: 'user', content: text }
-          ]);
+          const stream = generateCoachResponseStream(
+            messages,
+            text || "Process this audio",
+            mode,
+            language,
+            audioBase64
+          );
 
           let fullText = "";
           for await (const chunk of stream) {
@@ -191,40 +148,86 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
             ));
           }
           responseText = fullText;
-        } catch (offlineErr: any) {
-          console.error("Offline Service Error:", offlineErr);
-          setIsModelLoading(false);
-          setMessages(prev => [...prev, {
-            id: Date.now().toString(),
-            role: 'model',
-            text: offlineErr.message === "WEBGPU_NOT_SUPPORTED"
-              ? "Your device doesn't support offline AI. Please connect to the internet."
-              : "The offline brain is having trouble waking up. Please refresh the page.",
-            timestamp: Date.now()
-          }]);
+        } catch (onlineError) {
+          console.warn("Gemini online service failed, attempting Gemma offline fallback...", onlineError);
+          await handleOfflineResponse(text, audioBase64);
+          return;
         }
+      } else {
+        await handleOfflineResponse(text, audioBase64);
       }
 
       if (responseText) speakText(responseText);
-
     } catch (error: any) {
-      console.error(error);
-      setIsModelLoading(false); // Stop loading on error
+      console.error("Critical AI Error:", error);
+      setIsProcessing(false);
+      setMessages(prev => [...prev, {
+        id: Date.now().toString(),
+        role: 'model',
+        text: "I encountered a processing error. Please try again.",
+        timestamp: Date.now()
+      }]);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
-      let errorText = error.message || "I'm having some trouble connecting to my brain. Please try again in a moment.";
-      if (error.message === "WEBGPU_NOT_SUPPORTED") {
-        errorText = "Your device doesn't support offline AI (WebGPU missing). Please use Online Mode instead.";
+  const handleOfflineResponse = async (text: string, audioBase64?: string) => {
+    const { offlineAIService } = await import('../services/offlineAiService');
+    try {
+      const gpuStatus = await offlineAIService.isWebGPUSupported();
+      if (!gpuStatus.supported) throw new Error(gpuStatus.reason || "WEBGPU_NOT_SUPPORTED");
+
+      if (!await offlineAIService.isModelCached() || engineStatus !== 'READY') {
+        setIsModelLoading(true);
+        setEngineStatus('LOADING');
+        offlineAIService.setOnProgress((p) => setModelLoadingProgress(p));
+        await offlineAIService.init();
+        setIsModelLoading(false);
+        setEngineStatus('READY');
       }
 
-      const errorMsg: ChatMessage = {
+      const aiMsgId = (Date.now() + 1).toString();
+      setMessages(prev => [...prev, {
+        id: aiMsgId,
+        role: 'model',
+        text: '',
+        isAudio: true,
+        timestamp: Date.now()
+      }]);
+
+      const historyForOffline = messages.map(m => ({
+        role: m.role === 'model' ? 'assistant' : 'user' as "assistant" | "user",
+        content: m.text
+      }));
+
+      const stream = offlineAIService.generateResponseStream([
+        { role: 'system', content: `You are Gemma 4, an expert tutor. Mode: ${mode}. Language: ${language}` },
+        ...historyForOffline,
+        { role: 'user', content: text || "Analyze this audio input" }
+      ]);
+
+      let fullText = "";
+      for await (const chunk of stream) {
+        fullText += chunk;
+        setMessages(prev => prev.map(m =>
+          m.id === aiMsgId ? { ...m, text: fullText } : m
+        ));
+      }
+      if (fullText) speakText(fullText);
+    } catch (offlineErr: any) {
+      console.error("Gemma Offline Error:", offlineErr);
+      setIsModelLoading(false);
+      const errorText = offlineErr.message === "WEBGPU_NOT_SUPPORTED"
+        ? "Your device doesn't support offline AI. Please connect to the internet."
+        : "The offline brain is having trouble waking up. Please refresh the page.";
+      
+      setMessages(prev => [...prev, {
         id: Date.now().toString(),
         role: 'model',
         text: errorText,
         timestamp: Date.now()
-      };
-      setMessages(prev => [...prev, errorMsg]);
-    } finally {
-      setIsProcessing(false);
+      }]);
     }
   };
 
@@ -374,6 +377,7 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
             value={language}
             onChange={(e) => setLanguage(e.target.value as Language)}
             aria-label="Select Language"
+            title="Select Language"
             className="border dark:border-slate-700 rounded-lg px-3 py-1.5 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-indigo-500"
           >
             {Object.values(Language).map(l => (
