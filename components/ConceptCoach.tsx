@@ -36,6 +36,9 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [mode, setMode] = useState<CoachMode>(CoachMode.LEARNING);
   const [language, setLanguage] = useState<Language>(Language.ENGLISH);
+  const [isOnlineMode, setIsOnlineMode] = useState<boolean>(() => {
+    return typeof navigator !== 'undefined' ? navigator.onLine : true;
+  });
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -117,9 +120,8 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
     try {
       // ── HYBRID AI LOGIC ──────────────────────────────────────────
       let responseText = "";
-      const isOnline = navigator.onLine;
 
-      if (isOnline) {
+      if (isOnlineMode) {
         // ONLINE MODE: Use Gemini 3.1
         try {
           const aiMsgId = (Date.now() + 1).toString();
@@ -384,6 +386,21 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
               <option key={l} value={l}>{l}</option>
             ))}
           </select>
+
+          <div className="bg-slate-100 dark:bg-slate-800 p-1 rounded-lg flex">
+            <button
+              onClick={() => setIsOnlineMode(true)}
+              className={`px-3 py-1 rounded-md transition-all ${isOnlineMode ? 'bg-white dark:bg-slate-700 shadow text-indigo-600 dark:text-indigo-400 font-medium' : 'text-slate-500 dark:text-slate-400'}`}
+            >
+              Online
+            </button>
+            <button
+              onClick={() => setIsOnlineMode(false)}
+              className={`px-3 py-1 rounded-md transition-all ${!isOnlineMode ? 'bg-white dark:bg-slate-700 shadow text-indigo-600 dark:text-indigo-400 font-medium' : 'text-slate-500 dark:text-slate-400'}`}
+            >
+              Offline
+            </button>
+          </div>
 
           <div className="bg-slate-100 dark:bg-slate-800 p-1 rounded-lg flex">
             <button
