@@ -24,7 +24,7 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
     return [{
       id: 'welcome',
       role: 'model',
-      text: 'Hello! I am EduFree, now upgraded with the latest Gemini 3.1 Pro and Gemma 4. I am here to tutor you with advanced reasoning even without internet. What should we learn today?',
+      text: 'Hello! I am EduFree, now upgraded with the latest Gemini 3 Flash and Gemma 2B. I am here to tutor you with advanced reasoning even without internet. What should we learn today?',
       timestamp: Date.now()
     }];
   };
@@ -204,7 +204,7 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
       }));
 
       const stream = offlineAIService.generateResponseStream([
-        { role: 'system', content: `You are Gemma 4, an expert tutor. Mode: ${mode}. Language: ${language}` },
+        { role: 'system', content: `You are Gemma 2B, an expert tutor. Mode: ${mode}. Language: ${language}` },
         ...historyForOffline,
         { role: 'user', content: text || "Analyze this audio input" }
       ]);
@@ -323,7 +323,7 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
   };
 
   const getSyncStatus = () => {
-    let statusText = engineStatus === 'READY' ? "GEMMA 4 OFFLINE ACTIVE" : "OFFLINE BRAIN MISSING";
+    let statusText = engineStatus === 'READY' ? "GEMMA 2B OFFLINE ACTIVE" : "OFFLINE BRAIN MISSING";
     let statusColor = engineStatus === 'READY' ? "bg-green-500" : "bg-slate-400";
     let textColor = engineStatus === 'READY' ? "text-green-600 dark:text-green-400" : "text-slate-500 dark:text-slate-400";
     let bgColor = engineStatus === 'READY' ? "bg-green-50 dark:bg-green-900/20" : "bg-slate-50 dark:bg-slate-900/20";
@@ -336,13 +336,13 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
           className="flex items-center gap-1.5 px-3 py-1 bg-indigo-600 text-white rounded-md text-[11px] font-black border border-indigo-500 hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/20 transform active:scale-95"
         >
           <BrainCircuit className="w-3.5 h-3.5 animate-pulse" />
-          ACTIVATE GEMMA 4 OFFLINE
+          ACTIVATE GEMMA 2B OFFLINE
         </button>
       );
     }
 
     if (engineStatus === 'LOADING' || isModelLoading) {
-      statusText = `GEMMA 4 LOADING (${modelLoadingProgress}%)`;
+      statusText = `GEMMA 2B LOADING (${modelLoadingProgress}%)`;
       statusColor = "bg-amber-500";
       textColor = "text-amber-600 dark:text-amber-400";
       bgColor = "bg-amber-50 dark:bg-amber-900/20";

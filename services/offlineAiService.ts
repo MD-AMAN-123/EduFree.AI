@@ -32,6 +32,14 @@ export class OfflineAIService {
 
   async init() {
     if (this.isLoaded || this.isInitializing) return;
+    
+    // Check if there is already a globally cached engine on window (prevents hot-reload duplicate instances)
+    if (typeof window !== 'undefined' && (window as any).__webllm_engine__) {
+      this.engine = (window as any).__webllm_engine__;
+      this.isLoaded = true;
+      return;
+    }
+
     this.isInitializing = true;
 
     const gpuStatus = await this.isWebGPUSupported();
@@ -50,6 +58,11 @@ export class OfflineAIService {
           }
         },
       });
+      
+      if (typeof window !== 'undefined') {
+        (window as any).__webllm_engine__ = this.engine;
+      }
+
       this.isLoaded = true;
       this.isInitializing = false;
     } catch (error) {
@@ -94,6 +107,14 @@ export class OfflineAIService {
       }
     } catch (error: any) {
       console.error("CRITICAL: Offline AI streaming error:", error);
+      
+      // Self-healing reset: clear the engine instance so next attempt does a fresh init
+      this.engine = null;
+      this.isLoaded = false;
+      if (typeof window !== 'undefined') {
+        delete (window as any).__webllm_engine__;
+      }
+
       const msg = error?.message || "";
       if (msg.includes("out of memory")) yield "Offline AI ran out of memory. Try closing other tabs.";
       else if (msg.includes("device lost")) yield "Graphics device lost connection. Please refresh the page.";
