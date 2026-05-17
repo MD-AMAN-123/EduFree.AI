@@ -101,7 +101,7 @@ const CreatorStudio: React.FC = () => {
       <div className="h-[calc(100vh-64px)] md:h-full flex flex-col bg-slate-50 dark:bg-slate-950">
         <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b dark:border-slate-800 p-4 flex items-center justify-between shadow-sm sticky top-0 z-10">
           <div className="flex items-center gap-3">
-             <button onClick={() => setActiveBot(null)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+             <button onClick={() => setActiveBot(null)} aria-label="Go back" className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
                 <ArrowLeft size={20} className="text-slate-600 dark:text-slate-400" />
              </button>
              <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl flex items-center justify-center text-2xl border dark:border-slate-700">
@@ -162,6 +162,7 @@ const CreatorStudio: React.FC = () => {
              <button
                onClick={handleSendMessage}
                disabled={!inputText.trim() || isProcessing}
+               aria-label="Send message"
                className="bg-indigo-600 text-white p-4 rounded-2xl hover:bg-indigo-700 transition-all shadow-lg active:scale-95"
              >
                <Send size={24} />
@@ -216,6 +217,7 @@ const CreatorStudio: React.FC = () => {
                 <select 
                     className="w-full bg-slate-50 dark:bg-slate-900 border dark:border-slate-700 rounded-2xl px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:text-white"
                     value={newBot.personality}
+                    aria-label="Select Personality"
                     onChange={e => {
                         if (e.target.value === 'Other / Custom...') {
                             setIsCustomPersonality(true);
@@ -254,6 +256,7 @@ const CreatorStudio: React.FC = () => {
             <button 
               onClick={handleCreate}
               disabled={!newBot.name || !newBot.subject}
+              aria-label="Deploy Bot"
               className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold hover:bg-indigo-700 transition-all flex justify-center items-center gap-2 disabled:opacity-50 shadow-lg active:scale-95"
             >
               <Save size={20} /> Deploy Bot
@@ -290,12 +293,14 @@ const CreatorStudio: React.FC = () => {
                 <div className="flex gap-2 mt-auto relative z-10">
                   <button 
                     onClick={() => startChat(bot)}
+                    aria-label="Start Session"
                     className="flex-1 bg-slate-900 dark:bg-slate-700 text-white py-3 rounded-2xl text-sm font-bold hover:bg-black dark:hover:bg-slate-600 transition-all flex items-center justify-center gap-2 group-hover:bg-indigo-600"
                   >
                     <MessageCircle size={18} /> Start Session
                   </button>
                   <button 
                     onClick={() => setBots(bots.filter(b => b.id !== bot.id))}
+                    aria-label="Delete Bot"
                     className="p-3 bg-red-50 dark:bg-red-900/10 border dark:border-red-900/30 rounded-2xl text-red-500 hover:bg-red-500 hover:text-white transition-all"
                   >
                     <Trash2 size={20} />

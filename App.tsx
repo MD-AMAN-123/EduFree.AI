@@ -168,12 +168,14 @@ const App: React.FC = () => {
             <div className="flex items-center gap-1">
               <button
                 onClick={() => setIsDarkMode(!isDarkMode)}
+                aria-label="Toggle dark mode"
                 className="p-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all active:scale-95"
               >
                 {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
               </button>
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                aria-label="Toggle mobile menu"
                 className="p-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all active:scale-95"
               >
                 <Menu size={24} />

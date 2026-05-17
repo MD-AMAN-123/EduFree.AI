@@ -329,7 +329,7 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
     let bgColor = engineStatus === 'READY' ? "bg-green-50 dark:bg-green-900/20" : "bg-slate-50 dark:bg-slate-900/20";
     let borderColor = engineStatus === 'READY' ? "border-green-100 dark:border-green-800/30" : "border-slate-200 dark:border-slate-800/30";
 
-    if (navigator.onLine && engineStatus === 'IDLE') {
+    if (engineStatus === 'IDLE') {
       return (
         <button
           onClick={handleDownloadModel}
@@ -395,7 +395,12 @@ const ConceptCoach: React.FC<ConceptCoachProps> = ({ initialTopic, onClearTopic 
               Online
             </button>
             <button
-              onClick={() => setIsOnlineMode(false)}
+              onClick={() => {
+                setIsOnlineMode(false);
+                if (engineStatus === 'IDLE') {
+                  handleDownloadModel();
+                }
+              }}
               className={`px-3 py-1 rounded-md transition-all ${!isOnlineMode ? 'bg-white dark:bg-slate-700 shadow text-indigo-600 dark:text-indigo-400 font-medium' : 'text-slate-500 dark:text-slate-400'}`}
             >
               Offline

@@ -58,7 +58,7 @@ const AssignmentGenerator: React.FC<AssignmentGeneratorProps> = ({ onClearTopic 
             <div className="bg-indigo-600 p-2 rounded-xl text-white shadow-lg">
               <FileText size={24} />
             </div>
-            Gemma 4 Assignment Generator
+            Gemma 2B Assignment Generator
           </h2>
           <p className="text-slate-500 dark:text-slate-400 mb-8 max-w-xl">
             Generate custom assignments instantly, fully offline. Test your knowledge with structured questions.
@@ -74,6 +74,7 @@ const AssignmentGenerator: React.FC<AssignmentGeneratorProps> = ({ onClearTopic 
             <select
               value={difficulty}
               onChange={(e) => setDifficulty(e.target.value as DifficultyLevel)}
+              aria-label="Select Difficulty Level"
               className="border dark:border-slate-700 rounded-2xl px-4 py-4 bg-slate-50 dark:bg-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500 min-w-[150px]"
             >
               <option value="Beginner">Beginner</option>

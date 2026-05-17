@@ -138,6 +138,7 @@ const ExamArena: React.FC<ExamArenaProps> = ({ initialTopic, onClearTopic, stude
             <select
               value={difficulty}
               onChange={(e) => setDifficulty(e.target.value as DifficultyLevel)}
+              aria-label="Select Starting Difficulty"
               className="border dark:border-slate-700 rounded-xl px-3 py-3 bg-slate-50 dark:bg-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500"
             >
               <option>Beginner</option>
@@ -214,7 +215,7 @@ const ExamArena: React.FC<ExamArenaProps> = ({ initialTopic, onClearTopic, stude
                     onClick={() => handleOptionSelect(oIdx)}
                     className={`p-4 rounded-xl border-2 flex items-center justify-between transition-all ${cls}`}
                     role="radio"
-                    aria-checked={isSelected}
+                    aria-checked={isSelected ? "true" : "false"}
                     aria-label={opt}
                   >
                     <span className="text-slate-700 dark:text-slate-200 font-medium">{opt}</span>

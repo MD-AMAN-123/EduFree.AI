@@ -182,7 +182,7 @@ const DoubtSolver: React.FC = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-            Gemma 4 Doubt Solver
+            Gemma 2B Doubt Solver
           </h1>
           <p className="text-slate-500 dark:text-slate-400 font-medium">
             Scan any textbook question for a real-time resolution powered by Google's latest agentic model.
@@ -255,12 +255,14 @@ const DoubtSolver: React.FC = () => {
               <div className="absolute bottom-10 left-0 right-0 flex justify-center items-center gap-6">
                 <button 
                   onClick={stopCamera}
+                  aria-label="Stop Camera"
                   className="p-4 bg-white/10 backdrop-blur-md rounded-2xl text-white hover:bg-white/20 transition-all"
                 >
                   <StopCircle size={24} />
                 </button>
                 <button 
                   onClick={captureAndSolve}
+                  aria-label="Capture and Solve Question"
                   className="w-20 h-20 bg-white rounded-full p-1.5 shadow-2xl hover:scale-110 transition-all active:scale-95 group"
                 >
                   <div className="w-full h-full bg-slate-900 rounded-full flex items-center justify-center text-white group-hover:bg-indigo-600 transition-colors">
@@ -269,6 +271,7 @@ const DoubtSolver: React.FC = () => {
                 </button>
                 <button 
                   onClick={startCamera}
+                  aria-label="Restart Camera"
                   className="p-4 bg-white/10 backdrop-blur-md rounded-2xl text-white hover:bg-white/20 transition-all"
                 >
                   <RefreshCw size={24} />
@@ -322,7 +325,7 @@ const DoubtSolver: React.FC = () => {
           <div className="space-y-4">
             <h3 className="font-bold text-lg flex items-center gap-2 text-slate-700 dark:text-slate-300">
               <Brain size={20} className="text-purple-600" />
-              Gemma 4 Reasoning Engine
+              Gemma 2B Reasoning Engine
             </h3>
             
             <div className="bg-white dark:bg-slate-900 rounded-3xl border dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col min-h-[400px]">
@@ -411,7 +414,7 @@ const DoubtSolver: React.FC = () => {
               <Brain size={40} className="text-indigo-400" />
            </div>
            <div className="flex-1 space-y-2 text-center md:text-left">
-              <h4 className="text-xl font-black">Gemma 4 Visual Engine</h4>
+              <h4 className="text-xl font-black">Gemma 2B Visual Engine</h4>
               <p className="text-slate-400 text-sm max-w-xl">
                 Our AI model analyzes pixels to recognize complex mathematical symbols, scientific diagrams, and handwritten text. 
                 Optimized for real-time edge processing with sub-second analysis time.

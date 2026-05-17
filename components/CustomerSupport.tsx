@@ -20,8 +20,8 @@ const CustomerSupport: React.FC<CustomerSupportProps> = ({ user, isTeacherAuthen
       id: 'welcome',
       role: 'model',
       text: isTeacherAuthenticated 
-        ? 'Welcome, Teacher! I can help you manage your class using the new Gemma 4 interface. You can ask me to "Add a new student called Rahul with Grade A" or "Delete Arjun Verma".'
-        : 'Hi there! I am the EduFree Support Bot, now enhanced with Gemma 4. How can I help you with your account or studies today?',
+        ? 'Welcome, Teacher! I can help you manage your class using the new Gemma 2B interface. You can ask me to "Add a new student called Rahul with Grade A" or "Delete Arjun Verma".'
+        : 'Hi there! I am the EduFree Support Bot, now enhanced with Gemma 2B. How can I help you with your account or studies today?',
       timestamp: Date.now()
     }
   ]);
@@ -146,7 +146,7 @@ const CustomerSupport: React.FC<CustomerSupportProps> = ({ user, isTeacherAuthen
   const faqs = [
     { q: "How do I reset my password?", a: "Go to Profile Settings > Security > Change Password. If you are logged out, click 'Forgot Password' on the login screen." },
     { q: "Is the content available offline?", a: "Currently, you need an active internet connection to access the AI Coach and Exams. We are working on an offline mode!" },
-    { q: "How is my Originality Score calculated?", a: "We use Gemma 4 AI to analyze your text patterns against common AI-generated structures and known databases for peak accuracy." },
+    { q: "How is my Originality Score calculated?", a: "We use Gemma 2B AI to analyze your text patterns against common AI-generated structures and known databases for peak accuracy." },
     { q: "Can I upgrade my plan?", a: "Yes! Navigate to Settings > Subscription to view our Premium plans for unlimited AI queries." },
   ];
 
@@ -297,6 +297,7 @@ const CustomerSupport: React.FC<CustomerSupportProps> = ({ user, isTeacherAuthen
                             <button 
                                 onClick={handleSendMessage}
                                 disabled={!inputText.trim() || isProcessing}
+                                aria-label="Send message"
                                 className="bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50"
                             >
                                 <Send size={20} />
@@ -334,6 +335,7 @@ const CustomerSupport: React.FC<CustomerSupportProps> = ({ user, isTeacherAuthen
                                     className="w-full border dark:border-slate-600 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500 bg-white dark:bg-slate-800 dark:text-white"
                                     value={ticketForm.category}
                                     onChange={(e) => setTicketForm({...ticketForm, category: e.target.value})}
+                                    aria-label="Issue Category"
                                 >
                                     <option>Technical Issue</option>
                                     <option>Billing & Subscription</option>
